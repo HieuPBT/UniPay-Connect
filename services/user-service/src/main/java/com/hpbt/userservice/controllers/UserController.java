@@ -1,15 +1,17 @@
 package com.hpbt.userservice.controllers;
 
+import com.hpbt.userservice.dto.requests.AccessKeyRequest;
 import com.hpbt.userservice.dto.requests.UserRequest;
+import com.hpbt.userservice.dto.responses.AccessKeyResponse;
+import com.hpbt.userservice.dto.responses.ApiResponse;
 import com.hpbt.userservice.dto.responses.UserResponse;
+import com.hpbt.userservice.exceptions.StatusCode;
+import com.hpbt.userservice.mappers.UserMapper;
+import com.hpbt.userservice.services.AccessKeyService;
 import com.hpbt.userservice.services.UserService;
-import com.hpbt.userservice.utils.exceptions.UserExistException;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,22 +19,43 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/user")
 public class UserController {
     private final UserService userService;
+    private final AccessKeyService accessKeyService;
+    private final UserMapper userMapper;
 
     @RequestMapping("/hello")
-    public String hello(){
+    public String hello() {
         return "Hello World";
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@ModelAttribute @Valid UserRequest request){
-        try {
-            UserResponse user = userService.createUser(request);
-
-            return ResponseEntity.ok(user);
-        } catch (UserExistException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public ResponseEntity<?> register(@ModelAttribute @Valid UserRequest request) {
+        UserResponse user = userService.createUser(request);
+        ApiResponse apiResponse = new ApiResponse(StatusCode.CREATED.getCode(), StatusCode.CREATED.getMessage(), user);
+        return ResponseEntity.ok(apiResponse);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable(value = "id") int id ){
+        UserResponse user = userService.getUserById(id);
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(StatusCode.SUCCESS.getCode());
+        apiResponse.setMessage(StatusCode.SUCCESS.getMessage());
+        apiResponse.setResult(user);
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @PostMapping("/create-access-key")
+    public ResponseEntity<?> createAccessKey(@Valid @RequestBody AccessKeyRequest request) {
+        AccessKeyResponse accessKeyResponse = accessKeyService.createAccessKey(request);
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(StatusCode.SUCCESS.getCode());
+        apiResponse.setMessage(StatusCode.SUCCESS.getMessage());
+        apiResponse.setResult(accessKeyResponse);
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
 
 }
 

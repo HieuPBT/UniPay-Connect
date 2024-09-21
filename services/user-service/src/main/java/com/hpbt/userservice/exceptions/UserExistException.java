@@ -1,4 +1,4 @@
-package com.hpbt.userservice.utils.exceptions;
+package com.hpbt.userservice.exceptions;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

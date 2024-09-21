@@ -1,9 +1,11 @@
 package com.hpbt.userservice.mappers;
 
 import com.hpbt.userservice.dto.requests.UserRequest;
+import com.hpbt.userservice.dto.responses.ApiResponse;
 import com.hpbt.userservice.dto.responses.UserResponse;
 import com.hpbt.userservice.entities.User;
 import com.hpbt.userservice.entities.UserRole;
+import com.hpbt.userservice.exceptions.StatusCode;
 import com.hpbt.userservice.services.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -53,4 +55,12 @@ public class UserMapper {
                 user.getAvatar()
         );
     }
+
+//    public ApiResponse toApiResponse(StatusCode e, UserResponse userResponse){
+//        return new ApiResponse(
+//                e.getCode(),
+//                e.getMessage(),
+//                userResponse
+//        );
+//    }
 }
