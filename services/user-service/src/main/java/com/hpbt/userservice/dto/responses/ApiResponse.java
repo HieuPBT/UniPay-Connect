@@ -17,4 +17,7 @@ public class ApiResponse<T> {
     private int code;
     private String message;
     private T result;
+
+    public ApiResponse(int code, String message) {
+    }
 }

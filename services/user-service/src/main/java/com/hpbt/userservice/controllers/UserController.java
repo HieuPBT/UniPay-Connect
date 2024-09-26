@@ -1,6 +1,7 @@
 package com.hpbt.userservice.controllers;
 
 import com.hpbt.userservice.dto.requests.AccessKeyRequest;
+import com.hpbt.userservice.dto.requests.UpdateUserRequest;
 import com.hpbt.userservice.dto.requests.UserRequest;
 import com.hpbt.userservice.dto.responses.AccessKeyResponse;
 import com.hpbt.userservice.dto.responses.ApiResponse;
@@ -44,6 +45,11 @@ public class UserController {
 
         return ResponseEntity.ok(apiResponse);
     }
+
+//    @PatchMapping("/update-info")
+//    public ResponseEntity<?> updateUserInfo(@Valid @RequestBody UpdateUserRequest request) {
+//
+//    }
 
     @PostMapping("/create-access-key")
     public ResponseEntity<?> createAccessKey(@Valid @RequestBody AccessKeyRequest request) {

@@ -1,8 +1,10 @@
 package com.hpbt.userservice.services;
 
 import com.hpbt.userservice.dto.requests.AccessKeyRequest;
+import com.hpbt.userservice.dto.requests.AuthenticationRequest;
 import com.hpbt.userservice.dto.requests.UserRequest;
 import com.hpbt.userservice.dto.responses.AccessKeyResponse;
+import com.hpbt.userservice.dto.responses.AuthenticationResponse;
 import com.hpbt.userservice.dto.responses.UserResponse;
 import com.hpbt.userservice.entities.User;
 import com.hpbt.userservice.exceptions.CustomException;
@@ -45,4 +47,8 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserResponse(userRepository.findUserById(id));
     }
 
+//    public AuthenticationResponse authenticateUser(AuthenticationRequest authenticationRequest) {
+//        User user = userRepository.findByUsername(authenticationRequest.username())
+//                .orEl
+//    }
 }

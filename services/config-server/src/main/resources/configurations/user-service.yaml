@@ -26,5 +26,8 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
+jwt:
+  signerKey: "Rz3CoupHfEC7kwpbydPqXDcoOqd9Ws9KeYUUASkUErg="
+
 server:
   port: 8090
