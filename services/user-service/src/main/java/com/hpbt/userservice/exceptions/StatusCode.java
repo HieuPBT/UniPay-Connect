@@ -12,7 +12,8 @@ public enum StatusCode {
     USER_EXISTED(1001, "User existed"),
     USER_NOT_FOUND(1002, "User Not Found"),
     SUCCESS(2000, "Success"),
-    CREATED(2001, "User created"),
+    FAILED(2001, "Failed"),
+    CREATED(2002, "User created"),
     UNAUTHORIZED(4000, "Unauthorized"),
     FORBIDDEN(4001, "Forbidden"),
     INTERNAL(5000, "Internal error");

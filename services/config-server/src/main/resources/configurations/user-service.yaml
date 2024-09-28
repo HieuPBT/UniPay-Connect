@@ -29,5 +29,9 @@ spring:
 jwt:
   signerKey: "Rz3CoupHfEC7kwpbydPqXDcoOqd9Ws9KeYUUASkUErg="
 
+logging:
+  level:
+    org.springframework.security: TRACE
+
 server:
   port: 8090

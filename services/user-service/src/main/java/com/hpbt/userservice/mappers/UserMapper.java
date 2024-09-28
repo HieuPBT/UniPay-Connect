@@ -1,7 +1,9 @@
 package com.hpbt.userservice.mappers;
 
+import com.hpbt.userservice.dto.requests.AuthenticationRequest;
 import com.hpbt.userservice.dto.requests.UserRequest;
 import com.hpbt.userservice.dto.responses.ApiResponse;
+import com.hpbt.userservice.dto.responses.AuthenticationResponse;
 import com.hpbt.userservice.dto.responses.UserResponse;
 import com.hpbt.userservice.entities.User;
 import com.hpbt.userservice.entities.UserRole;
@@ -54,6 +56,10 @@ public class UserMapper {
                 user.getPhoneNumber(),
                 user.getAvatar()
         );
+    }
+
+    public AuthenticationResponse toAuthenticationResponse(String token){
+        return new AuthenticationResponse(token);
     }
 
 //    public ApiResponse toApiResponse(StatusCode e, UserResponse userResponse){

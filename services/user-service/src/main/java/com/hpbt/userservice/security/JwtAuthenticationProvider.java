@@ -37,7 +37,7 @@ public class JwtAuthenticationProvider {
                 .issueTime(new Date(
                         Instant.now().plus(2, ChronoUnit.HOURS).toEpochMilli()
                 ))
-                .claim("userrname", "Custom")
+                .claim("userrname", username)
                 .build();
 
         JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.HS256).build();
