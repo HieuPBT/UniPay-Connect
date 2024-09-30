@@ -20,7 +20,7 @@ public interface ZaloPayClientV1 {
 //    ZalopayResponse createZalopayV1(@SpringQueryMap Map<String, Object> order);
 
     @PostMapping(value = "${zalopay.version1.path.create}")
-    ResponseEntity<String> createZalopayV1(@RequestBody MultiValueMap<String, String> order);
+    ResponseEntity<String> createZalopayV1(@RequestBody MultiValueMap<String, String> request);
 
     @PostMapping("${zalopay.version1.path.query}")
     ZalopayResponse queryZalopayV1(@RequestBody @Valid ZaloPayRequest request);

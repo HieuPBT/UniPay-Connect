@@ -1,8 +1,10 @@
 package com.hpbt.paymentgatewayservice.controllers;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.JsonObject;
 import com.hpbt.paymentgatewayservice.clients.MoMoClient;
 import com.hpbt.paymentgatewayservice.clients.ZaloPayClientV1;
+import com.hpbt.paymentgatewayservice.clients.ZaloPayClientV2;
 import com.hpbt.paymentgatewayservice.dto.requests.MoMoRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.PaymentGatewayRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.ZaloPayRequest;
@@ -44,6 +46,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -58,6 +61,8 @@ public class PaymentGatewayController {
 
     final ZaloPayClientV1 zaloPayClientV1;
 
+    final ZaloPayClientV2 zaloPayClientV2;
+
     @Value("${momo.key.access-key}")
     String momoAccessKey;
 
@@ -67,17 +72,32 @@ public class PaymentGatewayController {
     @Value("${zalopay.version1.key.appId}")
     int zalopayV1AppId;
 
-    @Value("${zalopay.version1..key.key1}")
+    @Value("${zalopay.version1.key.key1}")
     String zalopayV1Key1;
 
     @Value("${zalopay.version1.key.key2}")
-    String zaloPayV2Key2;
+    String zaloPayV1Key2;
 
     @Value("${zalopay.version1.url.sandbox}")
     String zalopayV1Sandbox;
 
     @Value("${zalopay.version1.path.create}")
     String zalopayV1Create;
+
+    @Value("${zalopay.version2.key.appId}")
+    int zalopayV2AppId;
+
+    @Value("${zalopay.version2.key.key1}")
+    String zalopayV2Key1;
+
+    @Value("${zalopay.version2.key.key2}")
+    String zaloPayV2Key2;
+
+    @Value("${zalopay.version2.url.sandbox}")
+    String zalopayV2Sandbox;
+
+    @Value("${zalopay.version2.path.create}")
+    String zalopayV2Create;
 
     @PostMapping("/momo")
     public ResponseEntity<?> createMoMo() throws Exception {
@@ -150,9 +170,10 @@ public class PaymentGatewayController {
         Map<String, Object> order = new HashMap<String, Object>() {
             {
                 put("appid", zalopayV1AppId);
-                put("apptransid", getCurrentTimeString("yyMMdd") + "_" + new Random().nextInt(100000)); // mã giao dich có định dạng yyMMdd_xxxx
-                put("apptime", System.currentTimeMillis()); // miliseconds
-                put("appuser", "demo");
+                put("apptransid", getCurrentTimeString("yyMMdd") + "_" + new Random().nextInt(1000000)); // mã giao dich có định dạng yyMMdd_xxxx
+//                put("apptime",  LocalDateTime.now().toInstant(ZoneOffset.ofHours(7)).toEpochMilli()); // miliseconds
+                put("apptime",  System.currentTimeMillis()); // miliseconds
+                put("appuser", "user123");
                 put("amount", request.amount());
                 put("description", "Export PDF Fee - " + request.amount());
                 put("bankcode", "zalopayapp");
@@ -166,6 +187,7 @@ public class PaymentGatewayController {
 
         order.put("mac", HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, zalopayV1Key1, data));
 
+        System.out.println(zalopayV1Key1);
         System.out.println(order);
 
 //        RestTemplate restTemplate = new RestTemplate();
@@ -196,6 +218,63 @@ public class PaymentGatewayController {
         apiResponse.setResult(result.toMap());
 
         System.out.println(result);
+
+        return ResponseEntity.ok(apiResponse);
+
+    }
+
+    @PostMapping("/zalopay/v2/create")
+    public ResponseEntity<ApiResponse> createZaloPayV2(@RequestBody @Valid PaymentGatewayRequest request) {
+//        final Map embed_data = new HashMap() {
+//            {
+//                put("redirecturl", request.redirectUrl());
+//            }
+//        };
+//
+//        final Map[] item = {
+//                new HashMap() {
+//                    {
+//                        put("itemid", "knb");
+//                    }
+//                }
+//        };
+
+        Map<String, Object> order = new HashMap<String, Object>() {
+            {
+                put("app_id", zalopayV2AppId);
+                put("app_trans_id", getCurrentTimeString("yyMMdd") + "_" + new Random().nextInt(1000000)); // mã giao dich có định dạng yyMMdd_xxxx
+                put("app_time", System.currentTimeMillis()); // miliseconds
+                put("app_user", "user123");
+                put("amount", request.amount());
+                put("description", "Export PDF Fee - " + request.amount());
+                put("bank_code", "zalopayapp");
+                put("item", request.item());
+                put("embed_data", request.embed_data());
+                put("callback_url", request.callbackUrl());
+            }
+        };
+
+        String data = order.get("app_id") + "|" + order.get("app_trans_id") + "|" + order.get("app_user") + "|" + order.get("amount")
+                + "|" + order.get("app_time") + "|" + order.get("embed_data") + "|" + order.get("item");
+
+        order.put("mac", HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, zalopayV2Key1, data));
+
+        System.out.println(zalopayV2AppId);
+        System.out.println(zalopayV2Key1);
+        System.out.println(order);
+
+        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+        for (Map.Entry<String, Object> entry : order.entrySet()) {
+            map.add(entry.getKey(), String.valueOf(entry.getValue()));
+        }
+
+        ResponseEntity<String> response = zaloPayClientV2.createZalopayV2(map);
+        JSONObject result = new JSONObject(response.getBody());
+
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(StatusCode.SUCCESS.getCode());
+        apiResponse.setMessage(StatusCode.SUCCESS.getMessage());
+        apiResponse.setResult(result.toMap());
 
         return ResponseEntity.ok(apiResponse);
 

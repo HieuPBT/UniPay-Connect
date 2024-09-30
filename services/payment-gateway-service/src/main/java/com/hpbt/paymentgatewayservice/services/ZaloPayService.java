@@ -1,10 +1,8 @@
 package com.hpbt.paymentgatewayservice.services;
 
 import com.hpbt.paymentgatewayservice.dto.requests.PaymentGatewayRequest;
-import com.hpbt.paymentgatewayservice.dto.responses.MoMoResponse;
 import com.hpbt.paymentgatewayservice.dto.responses.ZalopayResponse;
 
-public interface PaymentGatewayService {
-    MoMoResponse createMoMo(PaymentGatewayRequest request);
+public interface ZaloPayService {
     ZalopayResponse zalopayCreateV2(PaymentGatewayRequest request);
 }

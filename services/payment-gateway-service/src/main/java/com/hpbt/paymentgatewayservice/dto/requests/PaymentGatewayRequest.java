@@ -24,7 +24,14 @@ public record PaymentGatewayRequest(
         @NotBlank(message = "CallbackUrl cannot be blank")
         @Size(max = 200, message = "CallbackUrl cannot exceed 200 characters")
         @Pattern(regexp = "^(https?|ftp)://[^\\s/$.?#].[^\\s]*$", message = "CallbackUrl must be a valid URL")
-        String callbackUrl
+        String callbackUrl,
+
+        String description,
+
+        String item,
+
+
+        String embed_data
 ) {
 }
 
