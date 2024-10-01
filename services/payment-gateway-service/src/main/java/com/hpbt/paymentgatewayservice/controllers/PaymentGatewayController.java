@@ -5,7 +5,10 @@ import com.hpbt.paymentgatewayservice.clients.ZaloPayClientV1;
 import com.hpbt.paymentgatewayservice.clients.ZaloPayClientV2;
 import com.hpbt.paymentgatewayservice.dto.requests.MoMoRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.PaymentGatewayRequest;
+import com.hpbt.paymentgatewayservice.dto.requests.momo.MoMoConfirmRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.momo.MoMoCreateRequest;
+import com.hpbt.paymentgatewayservice.dto.requests.momo.MoMoQueryRequest;
+import com.hpbt.paymentgatewayservice.dto.requests.momo.MoMoRefundRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.zalopay.version2.ZaloPayCreateRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.zalopay.version2.ZaloPayQueryRefundRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.zalopay.version2.ZaloPayQueryRequest;
@@ -44,93 +47,6 @@ import java.util.*;
 public class PaymentGatewayController {
     final PaymentGatewayService paymentGatewayService;
 
-    final MoMoClient moMoClient;
-
-    final ZaloPayClientV1 zaloPayClientV1;
-
-    final ZaloPayClientV2 zaloPayClientV2;
-
-    @Value("${momo.key.access-key}")
-    String momoAccessKey;
-
-    @Value("${momo.key.secret-key}")
-    String momoSecretKey;
-
-    @Value("${zalopay.version1.key.appId}")
-    int zalopayV1AppId;
-
-    @Value("${zalopay.version1.key.key1}")
-    String zalopayV1Key1;
-
-    @Value("${zalopay.version1.key.key2}")
-    String zaloPayV1Key2;
-
-    @Value("${zalopay.version1.url.sandbox}")
-    String zalopayV1Sandbox;
-
-    @Value("${zalopay.version1.path.create}")
-    String zalopayV1Create;
-
-    @Value("${zalopay.version2.key.appId}")
-    int zalopayV2AppId;
-
-    @Value("${zalopay.version2.key.key1}")
-    String zalopayV2Key1;
-
-    @Value("${zalopay.version2.key.key2}")
-    String zaloPayV2Key2;
-
-    @Value("${zalopay.version2.url.sandbox}")
-    String zalopayV2Sandbox;
-
-    @Value("${zalopay.version2.path.create}")
-    String zalopayV2Create;
-
-//    @PostMapping("/momo")
-//    public ResponseEntity<?> createMoMo() throws Exception {
-//        String accessKey = "F8BBA842ECF85";
-//        String secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
-//        String partnerCode = "MOMOT5BZ20231213_TEST";
-//        String requestId = partnerCode + "_" + Instant.now().toEpochMilli();
-//        String orderId = requestId;
-//        String requestType = "captureWallet";
-//        String extraData = "";
-//        String orderInfo = "Pay";
-//        String lang = "en";
-//
-//        long amount = 3000;
-//        String ipnUrl = "test";
-//        String redirectUrl = "";
-//
-//        String rawData = String.format(
-//                "accessKey=%s&amount=%s&extraData=%s&ipnUrl=%s&orderId=%s&orderInfo=%s&partnerCode=%s&redirectUrl=%s&requestId=%s&requestType=%s",
-//                accessKey, amount, extraData, ipnUrl, orderId, orderInfo, partnerCode, redirectUrl, requestId, requestType
-//        );
-//
-//        System.out.println(rawData);
-//        String signature = generateHmacSHA256(rawData, secretKey);
-//        System.out.println(signature);
-//
-//        MoMoRequest moMoRequest = new MoMoRequest(
-//                partnerCode,
-//                requestId,
-//                amount,
-//                orderId,
-//                ipnUrl,
-//                redirectUrl,
-//                orderInfo,
-//                requestType,
-//                extraData,
-//                lang,
-//                signature
-//
-//        );
-//
-//        MoMoResponse moMoResponse = moMoClient.createMoMo(moMoRequest);
-//
-//        return ResponseEntity.ok(moMoResponse);
-//    }
-
     @PostMapping("/momo/create")
     public ResponseEntity<ApiResponse> createMoMo(@RequestBody @Valid MoMoCreateRequest request) {
         ApiResponse apiResponse = new ApiResponse();
@@ -139,6 +55,42 @@ public class PaymentGatewayController {
         apiResponse.setMessage(StatusCode.SUCCESS.getMessage());
 
         apiResponse.setResult(paymentGatewayService.createMoMo(request));
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @PostMapping("/momo/query")
+    public ResponseEntity<ApiResponse> queryMoMo(@RequestBody @Valid MoMoQueryRequest request){
+        ApiResponse apiResponse = new ApiResponse();
+
+        apiResponse.setCode(StatusCode.SUCCESS.getCode());
+        apiResponse.setMessage(StatusCode.SUCCESS.getMessage());
+
+        apiResponse.setResult(paymentGatewayService.queryMoMo(request));
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @PostMapping("/momo/confirm")
+    public ResponseEntity<ApiResponse> confirmMoMo(@RequestBody @Valid MoMoConfirmRequest request){
+        ApiResponse apiResponse = new ApiResponse();
+
+        apiResponse.setCode(StatusCode.SUCCESS.getCode());
+        apiResponse.setMessage(StatusCode.SUCCESS.getMessage());
+
+        apiResponse.setResult(paymentGatewayService.confirmMoMo(request));
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @PostMapping("/momo/refund")
+    public ResponseEntity<ApiResponse> refundMoMo(@RequestBody @Valid MoMoRefundRequest request){
+        ApiResponse apiResponse = new ApiResponse();
+
+        apiResponse.setCode(StatusCode.SUCCESS.getCode());
+        apiResponse.setMessage(StatusCode.SUCCESS.getMessage());
+
+        apiResponse.setResult(paymentGatewayService.refundMoMo(request));
 
         return ResponseEntity.ok(apiResponse);
     }

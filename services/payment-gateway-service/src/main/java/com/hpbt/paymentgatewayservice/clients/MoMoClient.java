@@ -14,15 +14,15 @@ import java.util.Map;
 
 @FeignClient(name = "momo", url = "${momo.url.sandbox}")
 public interface MoMoClient {
-    @PostMapping(value = "${momo.path.create}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<String> createMoMo(@RequestBody MultiValueMap<String, String> request);
+    @PostMapping(value = "${momo.path.create}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<String> createMoMo(@RequestBody Map<String, Object> request);
 
     @PostMapping("${momo.path.query}")
-    ResponseEntity<String>  queryMoMo(@RequestBody MultiValueMap<String, String> request);
+    ResponseEntity<String>  queryMoMo(@RequestBody Map<String, Object> request);
 
     @PostMapping("${momo.path.confirm}")
-    ResponseEntity<String>  confirmMoMo(@RequestBody MultiValueMap<String, String> request);
+    ResponseEntity<String>  confirmMoMo(@RequestBody Map<String, Object> request);
 
     @PostMapping("${momo.path.refund")
-    ResponseEntity<String>  refundMoMo(@RequestBody MultiValueMap<String, String> request);
+    ResponseEntity<String>  refundMoMo(@RequestBody Map<String, Object> request);
 }

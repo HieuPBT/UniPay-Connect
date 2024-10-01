@@ -75,27 +75,25 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 
     @Override
     public Map<String, Object> createMoMo(MoMoCreateRequest request) {
-        Map<String, Object> data = new HashMap<>(){
-            {
-                put("partnerCode", request.partnerCode());
-                put("requestId", "Request_ID_" + CommonUtil.getCurrentTimeString("yyMMdd") + new Random().nextInt(10000));
-                put("amount", request.amount());
-                put("orderId", System.currentTimeMillis());
-                put("orderInfo", request.orderInfo());
-                put("redirectUrl", request.redirectUrl());
-                put("ipnUrl", request.ipnUrl());
-                put("requestType", request.requestType());
-                put("lang", request.lang());
-                put("extraData", request.extraData() != null ? request.extraData() : "");
-            }
-        };
+        Map<String, Object> data = new HashMap<>() {{
+            put("partnerCode", request.partnerCode());
+            put("requestId", "Request_ID_" + CommonUtil.getCurrentTimeString("yyMMdd") + new Random().nextInt(10000));
+            put("amount", request.amount());
+            put("orderId", String.valueOf(System.currentTimeMillis()));
+            put("orderInfo", request.orderInfo());
+            put("redirectUrl", request.redirectUrl());
+            put("ipnUrl", request.ipnUrl());
+            put("requestType", request.requestType());
+            put("lang", request.lang());
+            put("extraData", request.extraData() != null ? request.extraData() : "");
+        }};
 
-        if(request.items() != null){
-            data.put("items", request.extraData());
+        if (request.items() != null) {
+            data.put("items", request.items());
         }
 
-        if(request.autoCapture() != null){
-            data.put("autoCapture", request.autoCapture() ? true : false);
+        if (request.autoCapture() != null) {
+            data.put("autoCapture", request.autoCapture());
         }
 
         String rawData = String.format(
@@ -106,16 +104,12 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
                 data.get("requestId"), data.get("requestType")
         );
 
-        data.put("signature", HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, request.accessKey(), rawData));
+        String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, request.secretKey(), rawData);
+        data.put("signature", signature);
 
-        System.out.println(data);
+        System.out.println("Request data: " + data);
 
-        MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-        for (Map.Entry<String, Object> entry : data.entrySet()) {
-            requestBody.add(entry.getKey(), String.valueOf(entry.getValue()));
-        }
-
-        ResponseEntity<String> response = moMoClient.createMoMo(requestBody);
+        ResponseEntity<String> response = moMoClient.createMoMo(data);
         JSONObject result = new JSONObject(response.getBody());
 
         return result.toMap();
@@ -123,7 +117,26 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 
     @Override
     public Map<String, Object> queryMoMo(MoMoQueryRequest request) {
-        return Map.of();
+        Map<String, Object> data = new HashMap<>() {{
+            put("partnerCode", request.partnerCode());
+            put("requestId", "Request_ID_" + CommonUtil.getCurrentTimeString("yyMMdd") + new Random().nextInt(10000));
+            put("orderId", request.orderId());
+            put("lang", request.lang());
+        }};
+
+        String rawData = String.format(
+                "accessKey=%s&orderId=%s&partnerCode=%s&requestId=%s",
+                request.accessKey(), data.get("orderId"),
+                data.get("partnerCode"), data.get("requestId")
+        );
+
+        String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, request.secretKey(), rawData);
+        data.put("signature", signature);
+
+        ResponseEntity<String> response = moMoClient.queryMoMo(data);
+        JSONObject result = new JSONObject(response.getBody());
+
+        return result.toMap();
     }
 
     @Override
