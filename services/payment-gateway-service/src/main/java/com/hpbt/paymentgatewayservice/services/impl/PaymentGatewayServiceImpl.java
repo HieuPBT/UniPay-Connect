@@ -1,7 +1,12 @@
 package com.hpbt.paymentgatewayservice.services.impl;
 
+import com.hpbt.paymentgatewayservice.clients.MoMoClient;
 import com.hpbt.paymentgatewayservice.clients.ZaloPayClientV2;
 import com.hpbt.paymentgatewayservice.dto.requests.PaymentGatewayRequest;
+import com.hpbt.paymentgatewayservice.dto.requests.momo.MoMoConfirmRequest;
+import com.hpbt.paymentgatewayservice.dto.requests.momo.MoMoCreateRequest;
+import com.hpbt.paymentgatewayservice.dto.requests.momo.MoMoQueryRequest;
+import com.hpbt.paymentgatewayservice.dto.requests.momo.MoMoRefundRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.zalopay.version2.ZaloPayCreateRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.zalopay.version2.ZaloPayQueryRefundRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.zalopay.version2.ZaloPayQueryRequest;
@@ -36,6 +41,8 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 
    final ZaloPayClientV2 zaloPayClientV2;
 
+   final MoMoClient moMoClient;
+
     @Value("${zalopay.version1.key.appId}")
     int zalopayV1AppId;
 
@@ -67,8 +74,66 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
     String zalopayV2Create;
 
     @Override
-    public MoMoResponse createMoMo(PaymentGatewayRequest request) {
-        return null;
+    public Map<String, Object> createMoMo(MoMoCreateRequest request) {
+        Map<String, Object> data = new HashMap<>(){
+            {
+                put("partnerCode", request.partnerCode());
+                put("requestId", "Request_ID_" + CommonUtil.getCurrentTimeString("yyMMdd") + new Random().nextInt(10000));
+                put("amount", request.amount());
+                put("orderId", System.currentTimeMillis());
+                put("orderInfo", request.orderInfo());
+                put("redirectUrl", request.redirectUrl());
+                put("ipnUrl", request.ipnUrl());
+                put("requestType", request.requestType());
+                put("lang", request.lang());
+                put("extraData", request.extraData() != null ? request.extraData() : "");
+            }
+        };
+
+        if(request.items() != null){
+            data.put("items", request.extraData());
+        }
+
+        if(request.autoCapture() != null){
+            data.put("autoCapture", request.autoCapture() ? true : false);
+        }
+
+        String rawData = String.format(
+                "accessKey=%s&amount=%s&extraData=%s&ipnUrl=%s&orderId=%s&orderInfo=%s&partnerCode=%s&redirectUrl=%s&requestId=%s&requestType=%s",
+                request.accessKey(), data.get("amount"),
+                data.get("extraData"), data.get("ipnUrl"), data.get("orderId"),
+                data.get("orderInfo"), data.get("partnerCode"), data.get("redirectUrl"),
+                data.get("requestId"), data.get("requestType")
+        );
+
+        data.put("signature", HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, request.accessKey(), rawData));
+
+        System.out.println(data);
+
+        MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+        for (Map.Entry<String, Object> entry : data.entrySet()) {
+            requestBody.add(entry.getKey(), String.valueOf(entry.getValue()));
+        }
+
+        ResponseEntity<String> response = moMoClient.createMoMo(requestBody);
+        JSONObject result = new JSONObject(response.getBody());
+
+        return result.toMap();
+    }
+
+    @Override
+    public Map<String, Object> queryMoMo(MoMoQueryRequest request) {
+        return Map.of();
+    }
+
+    @Override
+    public Map<String, Object> confirmMoMo(MoMoConfirmRequest request) {
+        return Map.of();
+    }
+
+    @Override
+    public Map<String, Object> refundMoMo(MoMoRefundRequest request) {
+        return Map.of();
     }
 
     @Override

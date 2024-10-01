@@ -1,17 +1,23 @@
 package com.hpbt.paymentgatewayservice.services;
 
-import com.hpbt.paymentgatewayservice.dto.requests.PaymentGatewayRequest;
+import com.hpbt.paymentgatewayservice.dto.requests.momo.MoMoConfirmRequest;
+import com.hpbt.paymentgatewayservice.dto.requests.momo.MoMoCreateRequest;
+import com.hpbt.paymentgatewayservice.dto.requests.momo.MoMoQueryRequest;
+import com.hpbt.paymentgatewayservice.dto.requests.momo.MoMoRefundRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.zalopay.version2.ZaloPayCreateRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.zalopay.version2.ZaloPayQueryRefundRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.zalopay.version2.ZaloPayQueryRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.zalopay.version2.ZaloPayRefundRequest;
-import com.hpbt.paymentgatewayservice.dto.responses.MoMoResponse;
-import com.hpbt.paymentgatewayservice.dto.responses.ZalopayResponse;
 
 import java.util.Map;
 
 public interface PaymentGatewayService {
-    MoMoResponse createMoMo(PaymentGatewayRequest request);
+//    MoMoResponse createMoMo(PaymentGatewayRequest request);
+    Map<String, Object> createMoMo(MoMoCreateRequest request);
+    Map<String, Object> queryMoMo(MoMoQueryRequest request);
+    Map<String, Object> confirmMoMo(MoMoConfirmRequest request);
+    Map<String, Object> refundMoMo(MoMoRefundRequest request);
+
 //    ZalopayResponse zalopayCreateV2(PaymentGatewayRequest request);
     Map<String, Object> zalopayCreateV2(ZaloPayCreateRequest request);
     Map<String, Object> zalopayQueryV2(ZaloPayQueryRequest request);
