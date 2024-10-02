@@ -28,7 +28,7 @@ public class UserController {
     private final UserMapper userMapper;
 
     @RequestMapping("/hello")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public String hello() {
         return "Hello World";
     }
@@ -51,7 +51,7 @@ public class UserController {
         return ResponseEntity.ok(apiResponse);
     }
 
-    @PreAuthorize("hasRole('MERCHANT')")
+//    @PreAuthorize("hasRole('MERCHANT')")
     @GetMapping("/currentUser")
     public ResponseEntity<?> getCurrentUser(Principal principal){
         UserResponse userResponse = userService.getUserByUsername(principal.getName());

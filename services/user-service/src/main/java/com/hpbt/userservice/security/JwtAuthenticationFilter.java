@@ -1,5 +1,6 @@
 package com.hpbt.userservice.security;
 
+import com.hpbt.userservice.exceptions.CustomException;
 import com.hpbt.userservice.services.JwtService;
 import com.nimbusds.jose.JOSEException;
 import jakarta.servlet.FilterChain;
@@ -9,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.cloudinary.json.JSONException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
