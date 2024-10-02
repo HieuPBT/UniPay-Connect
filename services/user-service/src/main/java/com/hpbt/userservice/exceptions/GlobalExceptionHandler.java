@@ -5,9 +5,12 @@ import com.hpbt.userservice.mappers.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
@@ -28,6 +31,18 @@ public class GlobalExceptionHandler {
         apiResponse.setCode(statusCode.getCode());
         apiResponse.setMessage(customException.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
+    }
+
+    @ExceptionHandler(value = AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> accessDeniedException(AccessDeniedException accessDeniedException) {
+        StatusCode statusCode = StatusCode.FORBIDDEN;
+
+        return ResponseEntity.status(statusCode.getCode()).body(
+                ApiResponse.<Void>builder()
+                        .code(statusCode.getCode())
+                        .message(statusCode.getMessage())
+                        .build()
+        );
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

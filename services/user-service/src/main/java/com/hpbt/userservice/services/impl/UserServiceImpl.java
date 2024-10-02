@@ -1,20 +1,18 @@
-package com.hpbt.userservice.services;
+package com.hpbt.userservice.services.impl;
 
-import com.hpbt.userservice.dto.requests.AccessKeyRequest;
-import com.hpbt.userservice.dto.requests.AuthenticationRequest;
 import com.hpbt.userservice.dto.requests.UserRequest;
-import com.hpbt.userservice.dto.responses.AccessKeyResponse;
-import com.hpbt.userservice.dto.responses.AuthenticationResponse;
 import com.hpbt.userservice.dto.responses.UserResponse;
-import com.hpbt.userservice.entities.User;
 import com.hpbt.userservice.exceptions.CustomException;
 import com.hpbt.userservice.exceptions.StatusCode;
 import com.hpbt.userservice.mappers.AccessKeyMapper;
 import com.hpbt.userservice.mappers.UserMapper;
 import com.hpbt.userservice.repositories.UserRepository;
+import com.hpbt.userservice.services.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +43,18 @@ public class UserServiceImpl implements UserService {
         }
 
         return userMapper.toUserResponse(userRepository.findUserById(id));
+    }
+
+    @Override
+    public UserResponse getUserByUsername(String username) {
+        return userMapper.toUserResponse(userRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomException(StatusCode.USER_NOT_FOUND, "User with name " + username + " does not exist")));
+    }
+
+    @Override
+    public Set<UserResponse> getAllUsers() {
+//        return Set(userMapper.toUserResponse(userRepository.findAllByOrderByIdDesc());
+        return null;
     }
 
 //    public AuthenticationResponse authenticateUser(AuthenticationRequest authenticationRequest) {

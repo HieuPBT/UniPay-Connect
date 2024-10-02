@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
@@ -14,4 +15,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     User findUserById(int id);
 
     Optional<User>findByUsername(String username);
+    Set<User> findAllByOrderByIdDesc();
 }

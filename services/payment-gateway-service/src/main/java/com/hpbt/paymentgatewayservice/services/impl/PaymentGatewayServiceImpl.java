@@ -141,12 +141,63 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 
     @Override
     public Map<String, Object> confirmMoMo(MoMoConfirmRequest request) {
-        return Map.of();
+        Map<String, Object> data = new HashMap<>() {{
+            put("partnerCode", request.partnerCode());
+            put("requestId", "Request_ID_" + CommonUtil.getCurrentTimeString("yyMMdd") + new Random().nextInt(10000));
+            put("orderId", request.orderId());
+            put("amount", request.amount());
+            put("requestType", request.requestType());
+            put("description", request.description() != null ? request.description() : "");
+            put("lang", request.lang());
+        }};
+
+        String rawData = String.format(
+                "accessKey=%s&amount=%s&description=%s&orderId=%s&partnerCode=%s&requestId=%s&requestType=%s",
+                request.accessKey(), data.get("amount"), data.get("description"),
+                data.get("orderId"), data.get("partnerCode"), data.get("requestId"),
+                data.get("requestType")
+        );
+
+        String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, request.secretKey(), rawData);
+        data.put("signature", signature);
+
+        System.out.println("rawData: " + rawData);
+
+
+        ResponseEntity<String> response = moMoClient.confirmMoMo(data);
+        JSONObject result = new JSONObject(response.getBody());
+
+        return result.toMap();
     }
 
     @Override
     public Map<String, Object> refundMoMo(MoMoRefundRequest request) {
-        return Map.of();
+        Map<String, Object> data = new HashMap<>() {{
+            put("partnerCode", request.partnerCode());
+            put("requestId", "Request_ID_" + CommonUtil.getCurrentTimeString("yyMMdd") + new Random().nextInt(10000));
+            put("orderId", System.currentTimeMillis());
+            put("amount", request.amount());
+            put("transId", request.transId());
+            put("description", request.description() != null ? request.description() : "");
+            put("lang", request.lang());
+        }};
+
+        String rawData = String.format(
+                "accessKey=%s&amount=%s&description=%s&orderId=%s&partnerCode=%s&requestId=%s&transId=%s",
+                request.accessKey(), data.get("amount"), data.get("description"),
+                data.get("orderId"), data.get("partnerCode"), data.get("requestId"),
+                data.get("transId")
+        );
+
+        String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, request.secretKey(), rawData);
+        data.put("signature", signature);
+
+        System.out.println("rawData: " + rawData);
+
+        ResponseEntity<String> response = moMoClient.refundMoMo(data);
+        JSONObject result = new JSONObject(response.getBody());
+
+        return result.toMap();
     }
 
     @Override

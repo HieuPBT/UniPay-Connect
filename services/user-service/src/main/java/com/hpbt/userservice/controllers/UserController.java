@@ -13,7 +13,11 @@ import com.hpbt.userservice.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.hibernate5.SpringSessionContext;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,6 +28,7 @@ public class UserController {
     private final UserMapper userMapper;
 
     @RequestMapping("/hello")
+    @PreAuthorize("hasRole('ADMIN')")
     public String hello() {
         return "Hello World";
     }
@@ -46,10 +51,18 @@ public class UserController {
         return ResponseEntity.ok(apiResponse);
     }
 
-//    @PatchMapping("/update-info")
-//    public ResponseEntity<?> updateUserInfo(@Valid @RequestBody UpdateUserRequest request) {
-//
-//    }
+    @PreAuthorize("hasRole('MERCHANT')")
+    @GetMapping("/currentUser")
+    public ResponseEntity<?> getCurrentUser(Principal principal){
+        UserResponse userResponse = userService.getUserByUsername(principal.getName());
+
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(StatusCode.SUCCESS.getCode());
+        apiResponse.setMessage(StatusCode.SUCCESS.getMessage());
+        apiResponse.setResult(userResponse);
+
+        return ResponseEntity.ok(apiResponse);
+    }
 
     @PostMapping("/create-access-key")
     public ResponseEntity<?> createAccessKey(@Valid @RequestBody AccessKeyRequest request) {
