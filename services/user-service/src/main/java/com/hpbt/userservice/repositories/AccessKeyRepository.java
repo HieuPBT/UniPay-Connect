@@ -8,6 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface AccessKeyRepository extends JpaRepository<AccessKey, Integer> {
+    Optional<AccessKey> findById(int accessKeyId);
     Optional<AccessKey> findByApiKey(String accessKey);
-    Optional<AccessKey> findByUserId(Integer userId);
+    Optional<AccessKey> findByUserId(int userId);
 }

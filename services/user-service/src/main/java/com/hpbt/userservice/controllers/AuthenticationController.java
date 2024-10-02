@@ -33,48 +33,15 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
-    private AuthenticationManager authenticationManager;
-
-//    @Autowired
-//    private UserDetailsService userDetailsService;
-
-//    @PostMapping("/login")
-//    public ResponseEntity<ApiResponse> login(@RequestBody AuthenticationRequest authenticationRequest) {
-//        try{
-//            Authentication authentication = authenticationManager.authenticate(
-//                    new UsernamePasswordAuthenticationToken(authenticationRequest.username(), authenticationRequest.password())
-//            );
-//
-//            SecurityContextHolder.getContext().setAuthentication(authentication);
-////            UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.username());
-//
-//            String token = JwtAuthenticationProvider.generateToken(userDetails.getUsername());
-//
-//            ApiResponse apiResponse = new ApiResponse();
-//            apiResponse.setCode(StatusCode.SUCCESS.getCode());
-//            apiResponse.setMessage("Successfully logged in");
-//            apiResponse.setResult(new AuthenticationResponse(token));
-//
-//            return ResponseEntity.ok(apiResponse);
-//        } catch(AuthenticationException e){
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                    .body(new ApiResponse<>(StatusCode.USER_NOT_FOUND.getCode(), e.getMessage()));
-//        } catch(JOSEException e){
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(new ApiResponse<>(StatusCode.INTERNAL.getCode(), e.getMessage()));
-//        }
-//
-//    }
-
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse> authenticate(@RequestBody @Valid AuthenticationRequest authenticationRequest) throws JOSEException {
+    public ResponseEntity<ApiResponse<?>> authenticate(@RequestBody @Valid AuthenticationRequest authenticationRequest) throws JOSEException {
         AuthenticationResponse authenticationResponse = authenticationService.authenticate(authenticationRequest);
 
-        ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setCode(StatusCode.SUCCESS.getCode());
-        apiResponse.setMessage(StatusCode.SUCCESS.getMessage());
-        apiResponse.setResult(authenticationResponse);
+//        ApiResponse apiResponse = new ApiResponse();
+//        apiResponse.setCode(StatusCode.SUCCESS.getCode());
+//        apiResponse.setMessage(StatusCode.SUCCESS.getMessage());
+//        apiResponse.setResult(authenticationResponse);
 
-        return ResponseEntity.ok(apiResponse);
+        return ResponseEntity.ok(ApiResponse.success(authenticationResponse));
     }
 }

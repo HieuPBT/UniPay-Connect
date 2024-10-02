@@ -1,9 +1,11 @@
 package com.hpbt.userservice.dto.responses;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hpbt.userservice.entities.Status;
 
 import java.time.LocalDateTime;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record AccessKeyResponse(
         Integer id,
         String apiKey,

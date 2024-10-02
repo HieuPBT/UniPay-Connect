@@ -21,8 +21,9 @@ public enum StatusCode {
     BAD_REQUEST(1000, "Wrong format", HttpStatus.BAD_REQUEST),
     USER_EXISTED(1001, "User existed", HttpStatus.CONFLICT),
     USER_NOT_FOUND(1002, "User Not Found", HttpStatus.NOT_FOUND),
-    PASSWORD_TOO_WEAK(1003, "Password too weak", HttpStatus.BAD_REQUEST),
-    EMAIL_NOT_VERIFIED(1004, "Email not verified", HttpStatus.FORBIDDEN),
+    ACCESS_KEY_NOT_FOUND(1003, "Access Key Not Found", HttpStatus.NOT_FOUND),
+    PASSWORD_TOO_WEAK(1004, "Password too weak", HttpStatus.BAD_REQUEST),
+    EMAIL_NOT_VERIFIED(1005, "Email not verified", HttpStatus.FORBIDDEN),
 
     // Authentication and authorization error codes
     UNAUTHENTICATED(4000, "Unauthorized", HttpStatus.UNAUTHORIZED),

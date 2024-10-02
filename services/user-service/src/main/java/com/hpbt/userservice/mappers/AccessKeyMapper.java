@@ -5,6 +5,7 @@ import com.hpbt.userservice.dto.responses.AccessKeyResponse;
 import com.hpbt.userservice.entities.AccessKey;
 import com.hpbt.userservice.entities.Status;
 import com.hpbt.userservice.entities.User;
+import com.hpbt.userservice.utils.commons.CommonUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,11 +19,11 @@ public class AccessKeyMapper {
         return UUID.randomUUID().toString() + "_" +LocalDateTime.now();
     }
 
-    public AccessKey toAccessKey(AccessKeyRequest accessKeyRequest, User user) {
-        if(accessKeyRequest == null) return null;
+    public AccessKey toAccessKey(User user) {
+//        if(accessKeyRequest == null) return null;
 
         return AccessKey.builder()
-                .apiKey(generateApiKey())
+                .apiKey(CommonUtil.generateApiKey())
                 .status(Status.ACTIVE)
                 .created_at(LocalDateTime.now())
                 .expires_at(LocalDateTime.now().plusDays(30))

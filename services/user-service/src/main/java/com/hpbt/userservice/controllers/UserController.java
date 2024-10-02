@@ -1,8 +1,6 @@
 package com.hpbt.userservice.controllers;
 
-import com.hpbt.userservice.dto.requests.AccessKeyRequest;
-import com.hpbt.userservice.dto.requests.UpdateUserRequest;
-import com.hpbt.userservice.dto.requests.UserRequest;
+import com.hpbt.userservice.dto.requests.*;
 import com.hpbt.userservice.dto.responses.AccessKeyResponse;
 import com.hpbt.userservice.dto.responses.ApiResponse;
 import com.hpbt.userservice.dto.responses.UserResponse;
@@ -36,19 +34,18 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@ModelAttribute @Valid UserRequest request) {
         UserResponse user = userService.createUser(request);
-        ApiResponse apiResponse = new ApiResponse(StatusCode.CREATED.getCode(), StatusCode.CREATED.getMessage(), user);
-        return ResponseEntity.ok(apiResponse);
+
+        return ResponseEntity.ok(ApiResponse.builder()
+                .code(StatusCode.CREATED.getCode())
+                .message(StatusCode.CREATED.getMessage())
+                .result(user).build());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable(value = "id") int id ){
         UserResponse user = userService.getUserById(id);
-        ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setCode(StatusCode.SUCCESS.getCode());
-        apiResponse.setMessage(StatusCode.SUCCESS.getMessage());
-        apiResponse.setResult(user);
 
-        return ResponseEntity.ok(apiResponse);
+        return ResponseEntity.ok(ApiResponse.success(user));
     }
 
 //    @PreAuthorize("hasRole('MERCHANT')")
@@ -56,25 +53,29 @@ public class UserController {
     public ResponseEntity<?> getCurrentUser(Principal principal){
         UserResponse userResponse = userService.getUserByUsername(principal.getName());
 
-        ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setCode(StatusCode.SUCCESS.getCode());
-        apiResponse.setMessage(StatusCode.SUCCESS.getMessage());
-        apiResponse.setResult(userResponse);
-
-        return ResponseEntity.ok(apiResponse);
+        return ResponseEntity.ok(ApiResponse.success(userResponse));
     }
 
-    @PostMapping("/create-access-key")
-    public ResponseEntity<?> createAccessKey(@Valid @RequestBody AccessKeyRequest request) {
-        AccessKeyResponse accessKeyResponse = accessKeyService.createAccessKey(request);
-        ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setCode(StatusCode.SUCCESS.getCode());
-        apiResponse.setMessage(StatusCode.SUCCESS.getMessage());
-        apiResponse.setResult(accessKeyResponse);
+    @PostMapping("/create-api-key")
+    public ResponseEntity<?> createAccessKey() {
+        AccessKeyResponse accessKeyResponse = accessKeyService.createAccessKey();
 
-        return ResponseEntity.ok(apiResponse);
+        return ResponseEntity.ok(ApiResponse.success(accessKeyResponse));
+    }
+
+    @PostMapping("/revoke-api-key")
+    public ResponseEntity<?> revokeApiKey(@RequestBody @Valid RevokedAccessKeyRequest request) {
+        AccessKeyResponse accessKeyResponse = accessKeyService.revokeAccessKey(request);
+
+        return ResponseEntity.ok(ApiResponse.success(accessKeyResponse));
     }
 
 
+    @PostMapping("/validate-api-key")
+    public ResponseEntity<?> validateApiKey(@RequestBody @Valid ValidateApiKeyRequest request) {
+        Boolean isValid = accessKeyService.validateAccessKey(request.apiKey());
+
+        return ResponseEntity.ok(ApiResponse.success(isValid));
+    }
 }
 
