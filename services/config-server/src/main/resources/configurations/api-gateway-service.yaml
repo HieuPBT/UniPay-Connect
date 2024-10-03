@@ -4,11 +4,17 @@ spring:
       discovery:
         locator:
           enabled: true
+          lowerCaseServiceId: true
       routes:
         - id: user-service
-          uri: lb:http://USER-SERVICE
+          uri: lb:http://USER-SERVICE/
           predicates:
-            - Path=/api/v1/user**
+            - Path=/api/v1/user/**
+            - Path=/api/v1/login
+
+eureka:
+  instance:
+    hostname: localhost
 
 server:
   port: 8222
