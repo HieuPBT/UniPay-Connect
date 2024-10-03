@@ -1,13 +1,21 @@
 package com.hpbt.paymentgatewayservice.dto.requests;
 
+import com.hpbt.paymentgatewayservice.entities.Status;
 import jakarta.validation.constraints.*;
 
 
 public record PaymentGatewayRequest(
-        @NotNull(message = "ApiKey cannot be null")
-        @NotBlank(message = "ApiKey cannot be blank")
-        @Size(min = 10, max = 100, message = "ApiKey must be between 10 and 100 characters")
-        String apiKey
+        @NotNull(message = "requestUrl cannot be null")
+        @NotBlank(message = "requestUrl cannot be blank")
+        String requestUrl,
+
+        @NotNull(message = "status cannot be null")
+        Status status,
+
+        String context,
+
+        @NotNull(message = "transactionId cannot be null")
+        Integer transactionId
 ) {
 }
 

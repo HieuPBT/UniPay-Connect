@@ -11,8 +11,9 @@ import com.hpbt.paymentgatewayservice.dto.requests.zalopay.version2.ZaloPayCreat
 import com.hpbt.paymentgatewayservice.dto.requests.zalopay.version2.ZaloPayQueryRefundRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.zalopay.version2.ZaloPayQueryRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.zalopay.version2.ZaloPayRefundRequest;
-import com.hpbt.paymentgatewayservice.dto.responses.MoMoResponse;
-import com.hpbt.paymentgatewayservice.dto.responses.ZalopayResponse;
+import com.hpbt.paymentgatewayservice.dto.responses.PaymentLogResponse;
+import com.hpbt.paymentgatewayservice.entities.PaymentLog;
+import com.hpbt.paymentgatewayservice.mappers.PaymentLogMapper;
 import com.hpbt.paymentgatewayservice.repositories.PaymentGatewayRepository;
 import com.hpbt.paymentgatewayservice.services.PaymentGatewayService;
 import com.hpbt.paymentgatewayservice.utils.commons.CommonUtil;
@@ -37,11 +38,13 @@ import java.util.Random;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Slf4j
 public class PaymentGatewayServiceImpl implements PaymentGatewayService {
-   final PaymentGatewayRepository paymentGatewayRepository;
+    final PaymentLogMapper paymentLogMapper;
 
-   final ZaloPayClientV2 zaloPayClientV2;
+    final PaymentGatewayRepository paymentGatewayRepository;
 
-   final MoMoClient moMoClient;
+    final ZaloPayClientV2 zaloPayClientV2;
+
+    final MoMoClient moMoClient;
 
     @Value("${zalopay.version1.key.appId}")
     int zalopayV1AppId;
@@ -202,7 +205,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 
     @Override
     public Map<String, Object> zalopayCreateV2(ZaloPayCreateRequest request) {
-        Map<String, Object> data = new HashMap<String, Object>(){
+        Map<String, Object> data = new HashMap<String, Object>() {
             {
                 put("app_id", request.app_id());
                 put("app_trans_id", CommonUtil.getCurrentTimeString("yyMMdd") + "_" + new Random().nextInt(1000000)); // mã giao dich có định dạng yyMMdd_xxxx
@@ -238,7 +241,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 
     @Override
     public Map<String, Object> zalopayQueryV2(ZaloPayQueryRequest request) {
-        Map<String, Object> data = new HashMap<>(){
+        Map<String, Object> data = new HashMap<>() {
             {
                 put("app_id", request.app_id());
                 put("app_trans_id", request.app_trans_id());
@@ -263,7 +266,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
     public Map<String, Object> zalopayRefundV2(ZaloPayRefundRequest request) {
         Random rand = new Random();
         String uid = System.currentTimeMillis() + "" + (111 + rand.nextInt(888)); // unique id
-        Map<String, Object> data = new HashMap<>(){
+        Map<String, Object> data = new HashMap<>() {
             {
                 put("m_refund_id", CommonUtil.getCurrentTimeString("yyMMdd") + "_" + request.app_id() + "_" + uid);
                 put("app_id", request.app_id());
@@ -276,7 +279,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 
         String rawData;
 
-        if(request.refund_fee_amount() != null){
+        if (request.refund_fee_amount() != null) {
             data.put("refund_fee_amount", request.refund_fee_amount());
             rawData = data.get("app_id") + "|" + data.get("zp_trans_id")
                     + "|" + data.get("amount") + "|" + data.get("refund_fee_amount")
@@ -310,7 +313,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 
     @Override
     public Map<String, Object> zalopayQueryRefundV2(ZaloPayQueryRefundRequest request) {
-        Map<String, Object> data = new HashMap<>(){
+        Map<String, Object> data = new HashMap<>() {
             {
                 put("m_refund_id", request.m_refund_id());
                 put("app_id", request.app_id());
@@ -318,7 +321,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
             }
         };
 
-        String rawData = data.get("app_id") + "|" + data.get("m_refund_id") +"|" + data.get("timestamp");
+        String rawData = data.get("app_id") + "|" + data.get("m_refund_id") + "|" + data.get("timestamp");
 
         System.out.println(rawData);
 
@@ -336,6 +339,13 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
         JSONObject result = new JSONObject(response.getBody());
 
         return result.toMap();
+    }
+
+    @Override
+    public PaymentLogResponse createPaymentLog(PaymentGatewayRequest request) {
+        PaymentLog paymentLog = paymentGatewayRepository.save(paymentLogMapper.toPaymentLog(request));
+
+        return paymentLogMapper.toPayLogResponse(paymentLog);
     }
 
 

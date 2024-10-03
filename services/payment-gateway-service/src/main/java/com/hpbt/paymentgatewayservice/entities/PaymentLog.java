@@ -42,7 +42,7 @@ public class PaymentLog {
 
     @Column(name = "transaction_id", nullable = false)
     @NotNull(message = "TransactionID cannot be null")
-    @NotBlank(message = "TransactionID cannot be blak")
+    @NotBlank(message = "TransactionID cannot be blank")
     Integer transactionId;
 
     @CreatedDate

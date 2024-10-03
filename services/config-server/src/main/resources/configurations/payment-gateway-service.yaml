@@ -16,6 +16,12 @@ spring:
     baseline-version: 0
     baseline-description: "init database"
 
+feign:
+  url:
+    user-service: http://localhost:8090/api/v1/user
+    notification-service: http://localhost:8092/api/v1/notification
+
+
 momo:
   url:
     sandbox: https://test-payment.momo.vn
