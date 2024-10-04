@@ -13,6 +13,7 @@ import com.hpbt.paymentgatewayservice.dto.requests.zalopay.version2.ZaloPayQuery
 import com.hpbt.paymentgatewayservice.dto.requests.zalopay.version2.ZaloPayRefundRequest;
 import com.hpbt.paymentgatewayservice.dto.responses.PaymentLogResponse;
 import com.hpbt.paymentgatewayservice.entities.PaymentLog;
+import com.hpbt.paymentgatewayservice.entities.Status;
 import com.hpbt.paymentgatewayservice.mappers.PaymentLogMapper;
 import com.hpbt.paymentgatewayservice.repositories.PaymentGatewayRepository;
 import com.hpbt.paymentgatewayservice.services.PaymentGatewayService;
@@ -76,6 +77,27 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
     @Value("${zalopay.version2.path.create}")
     String zalopayV2Create;
 
+    @Value("${momo.path.create}")
+    String momoCreate;
+
+    @Value("${momo.path.query}")
+    String momoQuery;
+
+    @Value("${momo.path.confirm}")
+    String momoConfirm;
+
+    @Value("${momo.path.refund}")
+    String momoRefund;
+
+    @Value("${zalopay.version2.path.query}")
+    String zalopayV2Query;
+
+    @Value("${zalopay.version2.path.refund}")
+    String zalopayV2Refund;
+
+    @Value("${zalopay.version2.path.query-refund}")
+    String zalopayV2QueryRefund;
+
     @Override
     public Map<String, Object> createMoMo(MoMoCreateRequest request) {
         Map<String, Object> data = new HashMap<>() {{
@@ -112,10 +134,22 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 
         System.out.println("Request data: " + data);
 
-        ResponseEntity<String> response = moMoClient.createMoMo(data);
-        JSONObject result = new JSONObject(response.getBody());
+        try{
+            ResponseEntity<String> response = moMoClient.createMoMo(data);
+            JSONObject result = new JSONObject(response.getBody());
+            createPaymentLog(PaymentGatewayRequest.builder()
+                    .requestUrl(momoCreate)
+                    .context(result.toMap().toString())
+                    .status(Status.SUCCEED)
+                    .transactionId((Integer) data.get("orderId"))
+                    .build());
+            return result.toMap();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
 
-        return result.toMap();
+        return null;
+
     }
 
     @Override
