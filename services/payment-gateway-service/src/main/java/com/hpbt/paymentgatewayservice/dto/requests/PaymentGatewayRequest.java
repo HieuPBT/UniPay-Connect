@@ -16,7 +16,8 @@ public record PaymentGatewayRequest(
         String context,
 
         @NotNull(message = "transactionId cannot be null")
-        Integer transactionId
+        @NotBlank(message = "transactionId cannot be blank")
+        String transactionId
 ) {
 }
 

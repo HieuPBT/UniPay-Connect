@@ -14,10 +14,12 @@ import com.hpbt.paymentgatewayservice.dto.requests.zalopay.version2.ZaloPayRefun
 import com.hpbt.paymentgatewayservice.dto.responses.PaymentLogResponse;
 import com.hpbt.paymentgatewayservice.entities.PaymentLog;
 import com.hpbt.paymentgatewayservice.entities.Status;
+import com.hpbt.paymentgatewayservice.exceptions.CustomException;
 import com.hpbt.paymentgatewayservice.mappers.PaymentLogMapper;
 import com.hpbt.paymentgatewayservice.repositories.PaymentGatewayRepository;
 import com.hpbt.paymentgatewayservice.services.PaymentGatewayService;
 import com.hpbt.paymentgatewayservice.utils.commons.CommonUtil;
+import com.hpbt.paymentgatewayservice.utils.commons.StatusCode;
 import com.hpbt.paymentgatewayservice.utils.zalopay.crypto.HMACUtil;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -134,21 +136,26 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 
         System.out.println("Request data: " + data);
 
-        try{
+        try {
             ResponseEntity<String> response = moMoClient.createMoMo(data);
             JSONObject result = new JSONObject(response.getBody());
             createPaymentLog(PaymentGatewayRequest.builder()
                     .requestUrl(momoCreate)
-                    .context(result.toMap().toString())
+                    .context("create MoMo")
                     .status(Status.SUCCEED)
-                    .transactionId((Integer) data.get("orderId"))
+                    .transactionId((data.get("orderId")).toString())
                     .build());
             return result.toMap();
-        }catch(Exception e){
-            e.printStackTrace();
-        }
+        } catch (Exception e) {
+            createPaymentLog(PaymentGatewayRequest.builder()
+                    .requestUrl(momoCreate)
+                    .context("create MoMo")
+                    .status(Status.FAILED)
+                    .transactionId((data.get("orderId")).toString())
+                    .build());
 
-        return null;
+            throw new CustomException(StatusCode.FAILED, "Create MoMo failed");
+        }
 
     }
 
@@ -170,10 +177,26 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
         String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, request.secretKey(), rawData);
         data.put("signature", signature);
 
-        ResponseEntity<String> response = moMoClient.queryMoMo(data);
-        JSONObject result = new JSONObject(response.getBody());
+        try {
+            ResponseEntity<String> response = moMoClient.queryMoMo(data);
+            JSONObject result = new JSONObject(response.getBody());
+            createPaymentLog(PaymentGatewayRequest.builder()
+                    .requestUrl(momoQuery)
+                    .context("query MoMo")
+                    .status(Status.SUCCEED)
+                    .transactionId((data.get("orderId")).toString())
+                    .build());
+            return result.toMap();
+        } catch (Exception e) {
+            createPaymentLog(PaymentGatewayRequest.builder()
+                    .requestUrl(momoQuery)
+                    .context("query MoMo")
+                    .status(Status.FAILED)
+                    .transactionId((data.get("orderId")).toString())
+                    .build());
 
-        return result.toMap();
+            throw new CustomException(StatusCode.FAILED, "Query MoMo failed");
+        }
     }
 
     @Override
@@ -200,11 +223,25 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 
         System.out.println("rawData: " + rawData);
 
-
-        ResponseEntity<String> response = moMoClient.confirmMoMo(data);
-        JSONObject result = new JSONObject(response.getBody());
-
-        return result.toMap();
+        try{
+            ResponseEntity<String> response = moMoClient.confirmMoMo(data);
+            JSONObject result = new JSONObject(response.getBody());
+            createPaymentLog(PaymentGatewayRequest.builder()
+                    .requestUrl(momoConfirm)
+                    .context("confirm MoMo")
+                    .status(Status.SUCCEED)
+                    .transactionId((data.get("orderId")).toString())
+                    .build());
+            return result.toMap();
+        }catch(Exception e){
+            createPaymentLog(PaymentGatewayRequest.builder()
+                    .requestUrl(momoConfirm)
+                    .context("confirm MoMo")
+                    .status(Status.FAILED)
+                    .transactionId((data.get("orderId")).toString())
+                    .build());
+            throw new CustomException(StatusCode.FAILED, "Confirm MoMo failed");
+        }
     }
 
     @Override
@@ -231,10 +268,26 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 
         System.out.println("rawData: " + rawData);
 
-        ResponseEntity<String> response = moMoClient.refundMoMo(data);
-        JSONObject result = new JSONObject(response.getBody());
+        try{
+            ResponseEntity<String> response = moMoClient.refundMoMo(data);
+            JSONObject result = new JSONObject(response.getBody());
+            createPaymentLog(PaymentGatewayRequest.builder()
+                    .requestUrl(momoRefund)
+                    .context("refund MoMo")
+                    .status(Status.SUCCEED)
+                    .transactionId((data.get("transId")).toString())
+                    .build());
 
-        return result.toMap();
+            return result.toMap();
+        }catch (Exception e){
+            createPaymentLog(PaymentGatewayRequest.builder()
+                    .requestUrl(momoRefund)
+                    .context("refund MoMo")
+                    .status(Status.FAILED)
+                    .transactionId((data.get("transId")).toString())
+                    .build());
+            throw new CustomException(StatusCode.FAILED, "Refund MoMo failed");
+        }
     }
 
     @Override
@@ -267,10 +320,25 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
             map.add(entry.getKey(), String.valueOf(entry.getValue()));
         }
 
-        ResponseEntity<String> response = zaloPayClientV2.createZalopayV2(map);
-        JSONObject result = new JSONObject(response.getBody());
-
-        return result.toMap();
+        try{
+            ResponseEntity<String> response = zaloPayClientV2.createZalopayV2(map);
+            JSONObject result = new JSONObject(response.getBody());
+            createPaymentLog(PaymentGatewayRequest.builder()
+                    .requestUrl(zalopayV2Create)
+                    .context("create ZaloPay")
+                    .status(Status.SUCCEED)
+                    .transactionId((data.get("app_trans_id")).toString())
+                    .build());
+            return result.toMap();
+        }catch(Exception e){
+            createPaymentLog(PaymentGatewayRequest.builder()
+                    .requestUrl(zalopayV2Create)
+                    .context("create ZaloPay")
+                    .status(Status.FAILED)
+                    .transactionId((data.get("app_trans_id")).toString())
+                    .build());
+            throw new CustomException(StatusCode.FAILED, "Create ZaloPay failed");
+        }
     }
 
     @Override
@@ -289,11 +357,25 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
         for (Map.Entry<String, Object> entry : data.entrySet()) {
             map.add(entry.getKey(), String.valueOf(entry.getValue()));
         }
-
-        ResponseEntity<String> response = zaloPayClientV2.queryZalopayV2(map);
-        JSONObject result = new JSONObject(response.getBody());
-
-        return result.toMap();
+        try{
+            ResponseEntity<String> response = zaloPayClientV2.queryZalopayV2(map);
+            JSONObject result = new JSONObject(response.getBody());
+            createPaymentLog(PaymentGatewayRequest.builder()
+                    .requestUrl(zalopayV2Query)
+                    .context("query ZaloPay")
+                    .status(Status.SUCCEED)
+                    .transactionId((data.get("app_trans_id")).toString())
+                    .build());
+            return result.toMap();
+        }catch (Exception e){
+            createPaymentLog(PaymentGatewayRequest.builder()
+                    .requestUrl(zalopayV2Query)
+                    .context("query ZaloPay")
+                    .status(Status.FAILED)
+                    .transactionId((data.get("app_trans_id")).toString())
+                    .build());
+            throw new CustomException(StatusCode.FAILED, "Query ZaloPay failed");
+        }
     }
 
     @Override
@@ -336,13 +418,29 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
             map.add(entry.getKey(), String.valueOf(entry.getValue()));
         }
 
-        ResponseEntity<String> response = zaloPayClientV2.refundZalopayV2(map);
-        JSONObject result = new JSONObject(response.getBody());
+        try{
+            ResponseEntity<String> response = zaloPayClientV2.refundZalopayV2(map);
+            JSONObject result = new JSONObject(response.getBody());
 
-        Map<String, Object> resultMap = result.toMap();
-        resultMap.put("m_refund_id", data.get("m_refund_id"));
+            Map<String, Object> resultMap = result.toMap();
+            resultMap.put("m_refund_id", data.get("m_refund_id"));
+            createPaymentLog(PaymentGatewayRequest.builder()
+                    .requestUrl(zalopayV2Refund)
+                    .context("refund ZaloPay")
+                    .status(Status.SUCCEED)
+                    .transactionId((data.get("zp_trans_id")).toString())
+                    .build());
 
-        return resultMap;
+            return resultMap;
+        }catch(Exception e){
+            createPaymentLog(PaymentGatewayRequest.builder()
+                    .requestUrl(zalopayV2Refund)
+                    .context("refund ZaloPay")
+                    .status(Status.FAILED)
+                    .transactionId((data.get("zp_trans_id")).toString())
+                    .build());
+            throw new CustomException(StatusCode.FAILED, "Refund ZaloPay failed");
+        }
     }
 
     @Override
@@ -368,11 +466,26 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
         for (Map.Entry<String, Object> entry : data.entrySet()) {
             map.add(entry.getKey(), String.valueOf(entry.getValue()));
         }
+        try{
+            ResponseEntity<String> response = zaloPayClientV2.queryRefundZalopayV2(map);
+            JSONObject result = new JSONObject(response.getBody());
+            createPaymentLog(PaymentGatewayRequest.builder()
+                    .requestUrl(zalopayV2QueryRefund)
+                    .context("query refund ZaloPay")
+                    .status(Status.SUCCEED)
+                    .transactionId((data.get("m_refund_id")).toString())
+                    .build());
 
-        ResponseEntity<String> response = zaloPayClientV2.queryRefundZalopayV2(map);
-        JSONObject result = new JSONObject(response.getBody());
-
-        return result.toMap();
+            return result.toMap();
+        }catch (Exception e){
+            createPaymentLog(PaymentGatewayRequest.builder()
+                    .requestUrl(zalopayV2QueryRefund)
+                    .context("query refund ZaloPay")
+                    .status(Status.FAILED)
+                    .transactionId((data.get("m_refund_id")).toString())
+                    .build());
+            throw new CustomException(StatusCode.FAILED, "Query Refund ZaloPay failed");
+        }
     }
 
     @Override

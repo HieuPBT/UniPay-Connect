@@ -11,7 +11,7 @@ public record PaymentLogResponse(
         String requestUrl,
         Status status,
         String context,
-        Integer transactionId,
+        String transactionId,
         LocalDateTime createdAt
 ) {
 }
