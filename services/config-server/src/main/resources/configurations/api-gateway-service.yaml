@@ -7,11 +7,13 @@ spring:
           lowerCaseServiceId: true
       routes:
         - id: user-service
-          uri: lb:http://USER-SERVICE/
+          uri: lb://USER-SERVICE
           predicates:
-            - Path=/api/v1/user/**
-            - Path=/api/v1/login
-
+            - Path=/api/v1/user/** , /api/v1/login
+        - id: payment-gateway-service
+          uri: lb://PAYMENT-GATEWAY-SERVICE
+          predicates:
+            - Path=/api/v1/payment/**
 eureka:
   instance:
     hostname: localhost
