@@ -4,6 +4,7 @@ import com.hpbt.userservice.dto.requests.*;
 import com.hpbt.userservice.dto.responses.AccessKeyResponse;
 import com.hpbt.userservice.dto.responses.ApiResponse;
 import com.hpbt.userservice.dto.responses.UserResponse;
+import com.hpbt.userservice.dto.responses.ValidateAccessKeyResponse;
 import com.hpbt.userservice.exceptions.StatusCode;
 import com.hpbt.userservice.mappers.UserMapper;
 import com.hpbt.userservice.services.AccessKeyService;
@@ -72,10 +73,11 @@ public class UserController {
 
 
     @PostMapping("/validate-api-key")
-    public ResponseEntity<?> validateApiKey(@RequestBody @Valid ValidateApiKeyRequest request) {
+    public ResponseEntity<ApiResponse<ValidateAccessKeyResponse>> validateApiKey(@RequestBody @Valid ValidateApiKeyRequest request) {
         Boolean isValid = accessKeyService.validateAccessKey(request.apiKey());
 
-        return ResponseEntity.ok(ApiResponse.success(isValid));
+        return ResponseEntity.ok(ApiResponse.success(ValidateAccessKeyResponse.builder()
+                .isValid(isValid).build()));
     }
 }
 

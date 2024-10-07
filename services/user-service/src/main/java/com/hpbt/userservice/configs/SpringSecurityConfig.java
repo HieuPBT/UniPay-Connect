@@ -27,7 +27,6 @@ import javax.crypto.spec.SecretKeySpec;
 @EnableWebSecurity
 @RequiredArgsConstructor
 @EnableMethodSecurity
-
 public class SpringSecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -79,6 +78,8 @@ public class SpringSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(requests -> requests.requestMatchers("/api/v1/login").permitAll()
                         .requestMatchers("/api/v1/user/register").permitAll()
+                                .requestMatchers("/api/v1/login").permitAll()
+                                .requestMatchers("/api/v1/user/validate-api-key").permitAll()
 //                        .requestMatchers("/api/v1/user/hello").hasRole("ADMIN")
                         .anyRequest().authenticated()  // Các yêu cầu khác cần xác thực
         ).exceptionHandling(exceptionHandling -> exceptionHandling

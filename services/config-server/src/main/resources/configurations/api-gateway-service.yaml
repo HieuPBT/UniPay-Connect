@@ -17,6 +17,8 @@ spring:
 eureka:
   instance:
     hostname: localhost
+api:
+  prefix: "/api/v1"
 
 server:
   port: 8222
