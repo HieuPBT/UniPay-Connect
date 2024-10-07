@@ -40,7 +40,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
 //    @Value("${api.public-endpoints}")
 //    @NonFinal
-    private String [] publicEndpoints = {"/login", "/user/hello"};
+    private String [] publicEndpoints = {"/user/.*", "/login"};
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
