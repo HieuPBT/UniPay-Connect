@@ -22,6 +22,9 @@ public record TransactionRequest(
 
         @NotBlank(message = "orderId cannot be blank")
         @NotNull(message = "orderId cannot be null")
-        String orderId
+        String orderId,
+
+        @NotNull(message = "paymentTypeId cannot be null")
+        Integer paymentTypeId
 ) {
 }

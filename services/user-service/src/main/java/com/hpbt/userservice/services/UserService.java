@@ -14,4 +14,5 @@ public interface UserService{
     UserResponse getUserById(int id);
     UserResponse getUserByUsername(String username);
     Set<UserResponse> getAllUsers();
+    Boolean isUserExist(int id);
 }

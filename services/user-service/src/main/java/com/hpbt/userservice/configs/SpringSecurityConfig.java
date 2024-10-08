@@ -80,6 +80,7 @@ public class SpringSecurityConfig {
                         .requestMatchers("/api/v1/user/register").permitAll()
                                 .requestMatchers("/api/v1/login").permitAll()
                                 .requestMatchers("/api/v1/user/validate-api-key").permitAll()
+                                .requestMatchers("/internal/**").permitAll()
 //                        .requestMatchers("/api/v1/user/hello").hasRole("ADMIN")
                         .anyRequest().authenticated()  // Các yêu cầu khác cần xác thực
         ).exceptionHandling(exceptionHandling -> exceptionHandling

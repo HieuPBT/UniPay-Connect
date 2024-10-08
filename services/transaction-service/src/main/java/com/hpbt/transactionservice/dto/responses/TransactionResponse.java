@@ -1,5 +1,6 @@
 package com.hpbt.transactionservice.dto.responses;
 
+import com.hpbt.transactionservice.entities.PaymentTypes;
 import com.hpbt.transactionservice.entities.Status;
 import lombok.Builder;
 
@@ -13,6 +14,7 @@ public record TransactionResponse(
         String currency,
         Status status,
         String orderId,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        PaymentTypes paymentType
 ) {
 }

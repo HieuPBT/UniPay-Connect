@@ -22,6 +22,10 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final AccessKeyMapper accessKeyMapper;
 
+    @Override
+    public Boolean isUserExist(int id) {
+        return userRepository.existsById(id);
+    }
 
     @Override
     public UserResponse createUser(UserRequest userRequest) {

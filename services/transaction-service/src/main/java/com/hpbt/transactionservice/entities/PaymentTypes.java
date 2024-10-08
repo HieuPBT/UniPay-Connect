@@ -1,5 +1,6 @@
 package com.hpbt.transactionservice.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -45,6 +46,7 @@ public class PaymentTypes {
     @LastModifiedDate
     LocalDateTime updatedAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "paymentType", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Transaction> transactions;
 }

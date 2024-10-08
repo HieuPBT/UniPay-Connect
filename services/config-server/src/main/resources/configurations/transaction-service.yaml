@@ -15,6 +15,11 @@ spring:
     password: ${spring.datasource.password}
     baseline-version: 0
     baseline-description: "init database"
+    
+
+feign:
+  url:
+    user-service: http://localhost:8090/internal/v1/user/
 
 server:
   port: 8092
