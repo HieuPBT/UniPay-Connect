@@ -64,6 +64,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public TransactionResponse getTransactionByOrderId(String orderId) {
+        System.out.println(orderId);
         Transaction transaction = transactionRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new CustomException(
                         StatusCode.BAD_REQUEST, StatusCode.BAD_REQUEST.getMessage()

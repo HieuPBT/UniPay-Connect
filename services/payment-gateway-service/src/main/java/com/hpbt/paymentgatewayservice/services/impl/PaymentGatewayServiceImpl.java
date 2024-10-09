@@ -4,6 +4,7 @@ import com.hpbt.paymentgatewayservice.clients.MoMoClient;
 import com.hpbt.paymentgatewayservice.clients.TransactionServiceClient;
 import com.hpbt.paymentgatewayservice.clients.UserServiceClient;
 import com.hpbt.paymentgatewayservice.clients.ZaloPayClientV2;
+import com.hpbt.paymentgatewayservice.dto.requests.FindTransactionByOrderIdRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.PaymentGatewayRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.TransactionRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.UpdateTransactionStatusRequest;
@@ -212,7 +213,9 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
             String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, request.secretKey(), rawData);
             data.put("signature", signature);
 
-            ResponseEntity<ApiResponse<TransactionResponse>> transaction = transactionServiceClient.getTransactionByOrderId(data.get("orderId").toString());
+            ResponseEntity<ApiResponse<TransactionResponse>> transaction = transactionServiceClient.findTransactionByOrderId(new FindTransactionByOrderIdRequest(
+                    data.get("orderId").toString()
+            ));
             if (Objects.requireNonNull(transaction.getBody()).getResult() != null) {
                 try {
                     ResponseEntity<String> response = moMoClient.queryMoMo(data);
@@ -266,7 +269,9 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
             data.put("signature", signature);
 
             System.out.println("rawData: " + rawData);
-            ResponseEntity<ApiResponse<TransactionResponse>> transaction = transactionServiceClient.getTransactionByOrderId(data.get("orderId").toString());
+            ResponseEntity<ApiResponse<TransactionResponse>> transaction = transactionServiceClient.findTransactionByOrderId(new FindTransactionByOrderIdRequest(
+                    data.get("orderId").toString()
+            ));
             if (Objects.requireNonNull(transaction.getBody()).getResult() != null) {
                 try {
                     ResponseEntity<String> response = moMoClient.confirmMoMo(data);
@@ -320,7 +325,9 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 
             System.out.println("rawData: " + rawData);
 
-            ResponseEntity<ApiResponse<TransactionResponse>> transaction = transactionServiceClient.getTransactionByOrderId(data.get("orderId").toString());
+            ResponseEntity<ApiResponse<TransactionResponse>> transaction = transactionServiceClient.findTransactionByOrderId(new FindTransactionByOrderIdRequest(
+                   request.orderId()
+            ));
             if (Objects.requireNonNull(transaction.getBody()).getResult() != null) {
                 try {
                     ResponseEntity<String> response = moMoClient.refundMoMo(data);

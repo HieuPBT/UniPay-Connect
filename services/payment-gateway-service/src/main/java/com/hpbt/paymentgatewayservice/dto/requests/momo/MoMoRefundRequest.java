@@ -14,6 +14,10 @@ public record MoMoRefundRequest(
         @Positive(message = "amount must be a positive  number")
         Long amount,
 
+        @NotNull(message = "orderId cannot be null")
+        @NotBlank(message = "orderId cannot be blank")
+        String orderId,
+
         @NotNull(message = "transId cannot be null")
         @Positive(message = "transId must be a positive  number")
         Long transId,

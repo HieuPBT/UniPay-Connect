@@ -1,5 +1,6 @@
 package com.hpbt.transactionservice.controllers;
 
+import com.hpbt.transactionservice.dto.requests.FindTransactionByOrderIdRequest;
 import com.hpbt.transactionservice.dto.requests.TransactionRequest;
 import com.hpbt.transactionservice.dto.requests.UpdateTransactionStatusRequest;
 import com.hpbt.transactionservice.dto.responses.ApiResponse;
@@ -29,8 +30,8 @@ public class InternalTransactionController {
         return ResponseEntity.ok(ApiResponse.success(transactionService.updateTransaction(request)));
     }
 
-    @GetMapping("/get-transaction-by-orderId")
-    public ResponseEntity<ApiResponse<TransactionResponse>> getTransactionByOrderId(@RequestParam("orderId") String orderId) {
-        return ResponseEntity.ok(ApiResponse.success(transactionService.getTransactionByOrderId(orderId)));
+    @PostMapping("/get-transaction-by-orderId")
+    public ResponseEntity<ApiResponse<TransactionResponse>> findTransactionByOrderId(@RequestBody FindTransactionByOrderIdRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(transactionService.getTransactionByOrderId(request.orderId())));
     }
 }
