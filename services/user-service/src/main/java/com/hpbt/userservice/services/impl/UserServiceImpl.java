@@ -1,5 +1,6 @@
 package com.hpbt.userservice.services.impl;
 
+import com.hpbt.event.UserRegisterInfo;
 import com.hpbt.userservice.dto.requests.UserRequest;
 import com.hpbt.userservice.dto.requests.ValidateApiKeyRequest;
 import com.hpbt.userservice.dto.responses.UserResponse;
@@ -16,9 +17,11 @@ import com.hpbt.userservice.services.AccessKeyService;
 import com.hpbt.userservice.services.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -30,6 +33,7 @@ public class UserServiceImpl implements UserService {
     private final AccessKeyMapper accessKeyMapper;
     private final AccessKeyService accessKeyService;
     private final AccessKeyRepository accessKeyRepository;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
     public Boolean isUserExist(int id) {
@@ -58,6 +62,16 @@ public class UserServiceImpl implements UserService {
             throw new CustomException(StatusCode.USER_EXISTED, "User with email " + userRequest.email() + " already exists");
         }
         var user = userRepository.save(userMapper.toUser(userRequest));
+
+        UserRegisterInfo userRegisterInfo = UserRegisterInfo.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .avatar(user.getAvatar())
+                .build();
+
+        kafkaTemplate.send("user-registration", userRegisterInfo);
 
         return userMapper.toUserResponse(user);
     }
