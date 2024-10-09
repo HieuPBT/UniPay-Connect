@@ -1,4 +1,4 @@
-package com.hpbt.transactionservice.entities;
+package com.hpbt.paymentgatewayservice.dto.requests;
 
 public enum Status {
     SUCCEED,

@@ -31,39 +31,18 @@ public class PaymentGatewayController {
     final PaymentGatewayService paymentGatewayService;
 
     @PostMapping("/momo/create")
-    public ResponseEntity<ApiResponse> createMoMo(@RequestBody @Valid MoMoCreateRequest request) {
-        ApiResponse apiResponse = new ApiResponse();
-
-        apiResponse.setCode(StatusCode.SUCCESS.getCode());
-        apiResponse.setMessage(StatusCode.SUCCESS.getMessage());
-
-        apiResponse.setResult(paymentGatewayService.createMoMo(request));
-
-        return ResponseEntity.ok(apiResponse);
+    public ResponseEntity<ApiResponse<?>> createMoMo(@RequestBody @Valid MoMoCreateRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(paymentGatewayService.createMoMo(request)));
     }
 
     @PostMapping("/momo/query")
-    public ResponseEntity<ApiResponse> queryMoMo(@RequestBody @Valid MoMoQueryRequest request){
-        ApiResponse apiResponse = new ApiResponse();
-
-        apiResponse.setCode(StatusCode.SUCCESS.getCode());
-        apiResponse.setMessage(StatusCode.SUCCESS.getMessage());
-
-        apiResponse.setResult(paymentGatewayService.queryMoMo(request));
-
-        return ResponseEntity.ok(apiResponse);
+    public ResponseEntity<ApiResponse<?>> queryMoMo(@RequestBody @Valid MoMoQueryRequest request){
+        return ResponseEntity.ok(ApiResponse.success(paymentGatewayService.queryMoMo(request)));
     }
 
     @PostMapping("/momo/confirm")
-    public ResponseEntity<ApiResponse> confirmMoMo(@RequestBody @Valid MoMoConfirmRequest request){
-        ApiResponse apiResponse = new ApiResponse();
-
-        apiResponse.setCode(StatusCode.SUCCESS.getCode());
-        apiResponse.setMessage(StatusCode.SUCCESS.getMessage());
-
-        apiResponse.setResult(paymentGatewayService.confirmMoMo(request));
-
-        return ResponseEntity.ok(apiResponse);
+    public ResponseEntity<ApiResponse<?>> confirmMoMo(@RequestBody @Valid MoMoConfirmRequest request){
+        return ResponseEntity.ok(ApiResponse.success(paymentGatewayService.confirmMoMo(request)));
     }
 
     @PostMapping("/momo/refund")

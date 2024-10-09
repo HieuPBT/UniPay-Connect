@@ -2,6 +2,7 @@ package com.hpbt.transactionservice.services.impl;
 
 import com.hpbt.transactionservice.clients.UserServiceClient;
 import com.hpbt.transactionservice.dto.requests.TransactionRequest;
+import com.hpbt.transactionservice.dto.requests.UpdateTransactionStatusRequest;
 import com.hpbt.transactionservice.dto.responses.ApiResponse;
 import com.hpbt.transactionservice.dto.responses.TransactionResponse;
 import com.hpbt.transactionservice.entities.PaymentTypes;
@@ -48,5 +49,25 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = transactionRepository.save(transactionMapper.toTransaction(request, paymentTypes));
         return transactionMapper.toTransactionResponse(transaction);
 //        return Optional.empty();
+    }
+
+    @Override
+    public TransactionResponse updateTransaction(UpdateTransactionStatusRequest request) {
+        Transaction transaction = transactionRepository.findById(request.transactionId()).orElseThrow(
+                () -> new CustomException(StatusCode.BAD_REQUEST, StatusCode.BAD_REQUEST.getMessage())
+        );
+
+        transaction.setStatus(request.status());
+
+        return transactionMapper.toTransactionResponse(transactionRepository.save(transaction));
+    }
+
+    @Override
+    public TransactionResponse getTransactionByOrderId(String orderId) {
+        Transaction transaction = transactionRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new CustomException(
+                        StatusCode.BAD_REQUEST, StatusCode.BAD_REQUEST.getMessage()
+                ));
+        return transactionMapper.toTransactionResponse(transaction);
     }
 }

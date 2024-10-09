@@ -1,8 +1,7 @@
-package com.hpbt.transactionservice.dto.responses;
+package com.hpbt.paymentgatewayservice.dto.responses;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.hpbt.transactionservice.entities.PaymentTypes;
-import com.hpbt.transactionservice.entities.Status;
+import com.hpbt.paymentgatewayservice.dto.requests.Status;
 import lombok.Builder;
 
 import java.time.LocalDateTime;

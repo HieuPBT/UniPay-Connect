@@ -2,6 +2,7 @@ package com.hpbt.userservice.services;
 
 import com.hpbt.userservice.dto.requests.AccessKeyRequest;
 import com.hpbt.userservice.dto.requests.UserRequest;
+import com.hpbt.userservice.dto.requests.ValidateApiKeyRequest;
 import com.hpbt.userservice.dto.responses.AccessKeyResponse;
 import com.hpbt.userservice.dto.responses.UserResponse;
 import com.hpbt.userservice.exceptions.UserExistException;
@@ -15,4 +16,5 @@ public interface UserService{
     UserResponse getUserByUsername(String username);
     Set<UserResponse> getAllUsers();
     Boolean isUserExist(int id);
+    UserResponse findUserByApiKey (ValidateApiKeyRequest request);
 }

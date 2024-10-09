@@ -1,17 +1,18 @@
 package com.hpbt.paymentgatewayservice.services.impl;
 
 import com.hpbt.paymentgatewayservice.clients.MoMoClient;
+import com.hpbt.paymentgatewayservice.clients.TransactionServiceClient;
+import com.hpbt.paymentgatewayservice.clients.UserServiceClient;
 import com.hpbt.paymentgatewayservice.clients.ZaloPayClientV2;
 import com.hpbt.paymentgatewayservice.dto.requests.PaymentGatewayRequest;
-import com.hpbt.paymentgatewayservice.dto.requests.momo.MoMoConfirmRequest;
-import com.hpbt.paymentgatewayservice.dto.requests.momo.MoMoCreateRequest;
-import com.hpbt.paymentgatewayservice.dto.requests.momo.MoMoQueryRequest;
-import com.hpbt.paymentgatewayservice.dto.requests.momo.MoMoRefundRequest;
+import com.hpbt.paymentgatewayservice.dto.requests.TransactionRequest;
+import com.hpbt.paymentgatewayservice.dto.requests.UpdateTransactionStatusRequest;
+import com.hpbt.paymentgatewayservice.dto.requests.momo.*;
 import com.hpbt.paymentgatewayservice.dto.requests.zalopay.version2.ZaloPayCreateRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.zalopay.version2.ZaloPayQueryRefundRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.zalopay.version2.ZaloPayQueryRequest;
 import com.hpbt.paymentgatewayservice.dto.requests.zalopay.version2.ZaloPayRefundRequest;
-import com.hpbt.paymentgatewayservice.dto.responses.PaymentLogResponse;
+import com.hpbt.paymentgatewayservice.dto.responses.*;
 import com.hpbt.paymentgatewayservice.entities.PaymentLog;
 import com.hpbt.paymentgatewayservice.entities.Status;
 import com.hpbt.paymentgatewayservice.exceptions.CustomException;
@@ -34,6 +35,7 @@ import org.springframework.util.MultiValueMap;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 
 @Service
@@ -49,32 +51,35 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 
     final MoMoClient moMoClient;
 
-    @Value("${zalopay.version1.key.appId}")
-    int zalopayV1AppId;
+    final TransactionServiceClient transactionServiceClient;
+    private final UserServiceClient userServiceClient;
 
-    @Value("${zalopay.version1.key.key1}")
-    String zalopayV1Key1;
-
-    @Value("${zalopay.version1.key.key2}")
-    String zaloPayV1Key2;
-
-    @Value("${zalopay.version1.url.sandbox}")
-    String zalopayV1Sandbox;
-
-    @Value("${zalopay.version1.path.create}")
-    String zalopayV1Create;
-
-    @Value("${zalopay.version2.key.appId}")
-    int zalopayV2AppId;
-
-    @Value("${zalopay.version2.key.key1}")
-    String zalopayV2Key1;
-
-    @Value("${zalopay.version2.key.key2}")
-    String zaloPayV2Key2;
-
-    @Value("${zalopay.version2.url.sandbox}")
-    String zalopayV2Sandbox;
+//    @Value("${zalopay.version1.key.appId}")
+//    int zalopayV1AppId;
+//
+//    @Value("${zalopay.version1.key.key1}")
+//    String zalopayV1Key1;
+//
+//    @Value("${zalopay.version1.key.key2}")
+//    String zaloPayV1Key2;
+//
+//    @Value("${zalopay.version1.url.sandbox}")
+//    String zalopayV1Sandbox;
+//
+//    @Value("${zalopay.version1.path.create}")
+//    String zalopayV1Create;
+//
+//    @Value("${zalopay.version2.key.appId}")
+//    int zalopayV2AppId;
+//
+//    @Value("${zalopay.version2.key.key1}")
+//    String zalopayV2Key1;
+//
+//    @Value("${zalopay.version2.key.key2}")
+//    String zaloPayV2Key2;
+//
+//    @Value("${zalopay.version2.url.sandbox}")
+//    String zalopayV2Sandbox;
 
     @Value("${zalopay.version2.path.create}")
     String zalopayV2Create;
@@ -102,192 +107,247 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 
     @Override
     public Map<String, Object> createMoMo(MoMoCreateRequest request) {
-        Map<String, Object> data = new HashMap<>() {{
-            put("partnerCode", request.partnerCode());
-            put("requestId", "Request_ID_" + CommonUtil.getCurrentTimeString("yyMMdd") + new Random().nextInt(10000));
-            put("amount", request.amount());
-            put("orderId", String.valueOf(System.currentTimeMillis()));
-            put("orderInfo", request.orderInfo());
-            put("redirectUrl", request.redirectUrl());
-            put("ipnUrl", request.ipnUrl());
-            put("requestType", request.requestType());
-            put("lang", request.lang());
-            put("extraData", request.extraData() != null ? request.extraData() : "");
-        }};
+        ResponseEntity<ApiResponse<UserResponse>> userResponse = userServiceClient.findUserByApiKey(new ValidateApiKeyRequest(
+                request.apiKey()
+        ));
+        if (Objects.requireNonNull(userResponse.getBody()).getResult() != null) {
+            Map<String, Object> data = new HashMap<>() {{
+                put("partnerCode", request.partnerCode());
+                put("requestId", "Request_ID_" + CommonUtil.getCurrentTimeString("yyMMdd") + new Random().nextInt(10000));
+                put("amount", request.amount());
+                put("orderId", String.valueOf(System.currentTimeMillis()));
+                put("orderInfo", request.orderInfo());
+                put("redirectUrl", request.redirectUrl());
+                put("ipnUrl", request.ipnUrl());
+                put("requestType", request.requestType());
+                put("lang", request.lang());
+                put("extraData", request.extraData() != null ? request.extraData() : "");
+            }};
 
-        if (request.items() != null) {
-            data.put("items", request.items());
-        }
+            if (request.items() != null) {
+                data.put("items", request.items());
+            }
 
-        if (request.autoCapture() != null) {
-            data.put("autoCapture", request.autoCapture());
-        }
+            if (request.autoCapture() != null) {
+                data.put("autoCapture", request.autoCapture());
+            }
 
-        String rawData = String.format(
-                "accessKey=%s&amount=%s&extraData=%s&ipnUrl=%s&orderId=%s&orderInfo=%s&partnerCode=%s&redirectUrl=%s&requestId=%s&requestType=%s",
-                request.accessKey(), data.get("amount"),
-                data.get("extraData"), data.get("ipnUrl"), data.get("orderId"),
-                data.get("orderInfo"), data.get("partnerCode"), data.get("redirectUrl"),
-                data.get("requestId"), data.get("requestType")
-        );
+            String rawData = String.format(
+                    "accessKey=%s&amount=%s&extraData=%s&ipnUrl=%s&orderId=%s&orderInfo=%s&partnerCode=%s&redirectUrl=%s&requestId=%s&requestType=%s",
+                    request.accessKey(), data.get("amount"),
+                    data.get("extraData"), data.get("ipnUrl"), data.get("orderId"),
+                    data.get("orderInfo"), data.get("partnerCode"), data.get("redirectUrl"),
+                    data.get("requestId"), data.get("requestType")
+            );
 
-        String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, request.secretKey(), rawData);
-        data.put("signature", signature);
+            String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, request.secretKey(), rawData);
+            data.put("signature", signature);
 
-        System.out.println("Request data: " + data);
+            System.out.println("Request data: " + data);
 
-        try {
-            ResponseEntity<String> response = moMoClient.createMoMo(data);
-            JSONObject result = new JSONObject(response.getBody());
-            createPaymentLog(PaymentGatewayRequest.builder()
-                    .requestUrl(momoCreate)
-                    .context("create MoMo")
-                    .status(Status.SUCCEED)
-                    .transactionId((data.get("orderId")).toString())
-                    .build());
-            return result.toMap();
-        } catch (Exception e) {
-            createPaymentLog(PaymentGatewayRequest.builder()
-                    .requestUrl(momoCreate)
-                    .context("create MoMo")
-                    .status(Status.FAILED)
-                    .transactionId((data.get("orderId")).toString())
+            ResponseEntity<ApiResponse<TransactionResponse>> transaction = transactionServiceClient.createTransaction(TransactionRequest.builder()
+                    .orderId((data.get("orderId")).toString())
+                    .status(com.hpbt.paymentgatewayservice.dto.requests.Status.PENDING)
+                    .amount(Long.parseLong((data.get("amount")).toString()))
+                    .currency("vn")
+                    .paymentTypeId(1)
+                    .userId(Objects.requireNonNull(userResponse.getBody()).getResult().id())
                     .build());
 
-            throw new CustomException(StatusCode.FAILED, "Create MoMo failed");
-        }
+            if (transaction.getStatusCode().is2xxSuccessful()) {
+                try {
 
+                    ResponseEntity<String> response = moMoClient.createMoMo(data);
+                    JSONObject result = new JSONObject(response.getBody());
+                    createPaymentLog(PaymentGatewayRequest.builder()
+                            .requestUrl(momoCreate)
+                            .context("create MoMo")
+                            .status(Status.SUCCEED)
+                            .transactionId(Objects.requireNonNull(transaction.getBody()).getResult().id().toString())
+                            .build());
+                    transactionServiceClient.upddateTransaction(UpdateTransactionStatusRequest.builder()
+                            .transactionId(transaction.getBody().getResult().id())
+                            .status(com.hpbt.paymentgatewayservice.dto.requests.Status.SUCCEED)
+                            .build());
+                    return result.toMap();
+                } catch (Exception e) {
+                    createPaymentLog(PaymentGatewayRequest.builder()
+                            .requestUrl(momoCreate)
+                            .context("create MoMo")
+                            .status(Status.FAILED)
+                            .transactionId(Objects.requireNonNull(transaction.getBody()).getResult().id().toString())
+                            .build());
+                    transactionServiceClient.upddateTransaction(UpdateTransactionStatusRequest.builder()
+                            .transactionId(transaction.getBody().getResult().id())
+                            .status(com.hpbt.paymentgatewayservice.dto.requests.Status.FAILED)
+                            .build());
+                    throw new CustomException(StatusCode.FAILED, "Create MoMo failed");
+                }
+            }
+        }
+        ;
+
+        throw new CustomException(StatusCode.FAILED, "Create MoMo failed");
     }
 
     @Override
     public Map<String, Object> queryMoMo(MoMoQueryRequest request) {
-        Map<String, Object> data = new HashMap<>() {{
-            put("partnerCode", request.partnerCode());
-            put("requestId", "Request_ID_" + CommonUtil.getCurrentTimeString("yyMMdd") + new Random().nextInt(10000));
-            put("orderId", request.orderId());
-            put("lang", request.lang());
-        }};
+        ResponseEntity<ApiResponse<ValidateAccessKeyResponse>> isValid = userServiceClient.validateApiKey(new ValidateApiKeyRequest(
+                request.apiKey()
+        ));
+        if (Objects.requireNonNull(isValid.getBody()).getResult().isValid()) {
+            Map<String, Object> data = new HashMap<>() {{
+                put("partnerCode", request.partnerCode());
+                put("requestId", "Request_ID_" + CommonUtil.getCurrentTimeString("yyMMdd") + new Random().nextInt(10000));
+                put("orderId", request.orderId());
+                put("lang", request.lang());
+            }};
 
-        String rawData = String.format(
-                "accessKey=%s&orderId=%s&partnerCode=%s&requestId=%s",
-                request.accessKey(), data.get("orderId"),
-                data.get("partnerCode"), data.get("requestId")
-        );
+            String rawData = String.format(
+                    "accessKey=%s&orderId=%s&partnerCode=%s&requestId=%s",
+                    request.accessKey(), data.get("orderId"),
+                    data.get("partnerCode"), data.get("requestId")
+            );
 
-        String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, request.secretKey(), rawData);
-        data.put("signature", signature);
+            String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, request.secretKey(), rawData);
+            data.put("signature", signature);
 
-        try {
-            ResponseEntity<String> response = moMoClient.queryMoMo(data);
-            JSONObject result = new JSONObject(response.getBody());
-            createPaymentLog(PaymentGatewayRequest.builder()
-                    .requestUrl(momoQuery)
-                    .context("query MoMo")
-                    .status(Status.SUCCEED)
-                    .transactionId((data.get("orderId")).toString())
-                    .build());
-            return result.toMap();
-        } catch (Exception e) {
-            createPaymentLog(PaymentGatewayRequest.builder()
-                    .requestUrl(momoQuery)
-                    .context("query MoMo")
-                    .status(Status.FAILED)
-                    .transactionId((data.get("orderId")).toString())
-                    .build());
+            ResponseEntity<ApiResponse<TransactionResponse>> transaction = transactionServiceClient.getTransactionByOrderId(data.get("orderId").toString());
+            if (Objects.requireNonNull(transaction.getBody()).getResult() != null) {
+                try {
+                    ResponseEntity<String> response = moMoClient.queryMoMo(data);
+                    JSONObject result = new JSONObject(response.getBody());
+                    createPaymentLog(PaymentGatewayRequest.builder()
+                            .requestUrl(momoQuery)
+                            .context("query MoMo")
+                            .status(Status.SUCCEED)
+                            .transactionId(transaction.getBody().getResult().id().toString())
+                            .build());
+                    return result.toMap();
+                } catch (Exception e) {
+                    createPaymentLog(PaymentGatewayRequest.builder()
+                            .requestUrl(momoQuery)
+                            .context("query MoMo")
+                            .status(Status.FAILED)
+                            .transactionId(transaction.getBody().getResult().id().toString())
+                            .build());
 
-            throw new CustomException(StatusCode.FAILED, "Query MoMo failed");
+                    throw new CustomException(StatusCode.FAILED, "Query MoMo failed");
+                }
+            }
         }
+        throw new CustomException(StatusCode.FAILED, "Query MoMo failed");
     }
 
     @Override
     public Map<String, Object> confirmMoMo(MoMoConfirmRequest request) {
-        Map<String, Object> data = new HashMap<>() {{
-            put("partnerCode", request.partnerCode());
-            put("requestId", "Request_ID_" + CommonUtil.getCurrentTimeString("yyMMdd") + new Random().nextInt(10000));
-            put("orderId", request.orderId());
-            put("amount", request.amount());
-            put("requestType", request.requestType());
-            put("description", request.description() != null ? request.description() : "");
-            put("lang", request.lang());
-        }};
+        ResponseEntity<ApiResponse<ValidateAccessKeyResponse>> isValid = userServiceClient.validateApiKey(new ValidateApiKeyRequest(
+                request.apiKey()
+        ));
+        if (Objects.requireNonNull(isValid.getBody()).getResult().isValid()) {
+            Map<String, Object> data = new HashMap<>() {{
+                put("partnerCode", request.partnerCode());
+                put("requestId", "Request_ID_" + CommonUtil.getCurrentTimeString("yyMMdd") + new Random().nextInt(10000));
+                put("orderId", request.orderId());
+                put("amount", request.amount());
+                put("requestType", request.requestType());
+                put("description", request.description() != null ? request.description() : "");
+                put("lang", request.lang());
+            }};
 
-        String rawData = String.format(
-                "accessKey=%s&amount=%s&description=%s&orderId=%s&partnerCode=%s&requestId=%s&requestType=%s",
-                request.accessKey(), data.get("amount"), data.get("description"),
-                data.get("orderId"), data.get("partnerCode"), data.get("requestId"),
-                data.get("requestType")
-        );
+            String rawData = String.format(
+                    "accessKey=%s&amount=%s&description=%s&orderId=%s&partnerCode=%s&requestId=%s&requestType=%s",
+                    request.accessKey(), data.get("amount"), data.get("description"),
+                    data.get("orderId"), data.get("partnerCode"), data.get("requestId"),
+                    data.get("requestType")
+            );
 
-        String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, request.secretKey(), rawData);
-        data.put("signature", signature);
+            String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, request.secretKey(), rawData);
+            data.put("signature", signature);
 
-        System.out.println("rawData: " + rawData);
-
-        try{
-            ResponseEntity<String> response = moMoClient.confirmMoMo(data);
-            JSONObject result = new JSONObject(response.getBody());
-            createPaymentLog(PaymentGatewayRequest.builder()
-                    .requestUrl(momoConfirm)
-                    .context("confirm MoMo")
-                    .status(Status.SUCCEED)
-                    .transactionId((data.get("orderId")).toString())
-                    .build());
-            return result.toMap();
-        }catch(Exception e){
-            createPaymentLog(PaymentGatewayRequest.builder()
-                    .requestUrl(momoConfirm)
-                    .context("confirm MoMo")
-                    .status(Status.FAILED)
-                    .transactionId((data.get("orderId")).toString())
-                    .build());
-            throw new CustomException(StatusCode.FAILED, "Confirm MoMo failed");
+            System.out.println("rawData: " + rawData);
+            ResponseEntity<ApiResponse<TransactionResponse>> transaction = transactionServiceClient.getTransactionByOrderId(data.get("orderId").toString());
+            if (Objects.requireNonNull(transaction.getBody()).getResult() != null) {
+                try {
+                    ResponseEntity<String> response = moMoClient.confirmMoMo(data);
+                    JSONObject result = new JSONObject(response.getBody());
+                    createPaymentLog(PaymentGatewayRequest.builder()
+                            .requestUrl(momoConfirm)
+                            .context("confirm MoMo")
+                            .status(Status.SUCCEED)
+                            .transactionId(transaction.getBody().getResult().id().toString())
+                            .build());
+                    return result.toMap();
+                } catch (Exception e) {
+                    createPaymentLog(PaymentGatewayRequest.builder()
+                            .requestUrl(momoConfirm)
+                            .context("confirm MoMo")
+                            .status(Status.FAILED)
+                            .transactionId(transaction.getBody().getResult().id().toString())
+                            .build());
+                    throw new CustomException(StatusCode.FAILED, "Confirm MoMo failed");
+                }
+            }
         }
+        throw new CustomException(StatusCode.FAILED, "Confirm MoMo failed");
     }
 
     @Override
     public Map<String, Object> refundMoMo(MoMoRefundRequest request) {
-        Map<String, Object> data = new HashMap<>() {{
-            put("partnerCode", request.partnerCode());
-            put("requestId", "Request_ID_" + CommonUtil.getCurrentTimeString("yyMMdd") + new Random().nextInt(10000));
-            put("orderId", System.currentTimeMillis());
-            put("amount", request.amount());
-            put("transId", request.transId());
-            put("description", request.description() != null ? request.description() : "");
-            put("lang", request.lang());
-        }};
+        ResponseEntity<ApiResponse<ValidateAccessKeyResponse>> isValid = userServiceClient.validateApiKey(new ValidateApiKeyRequest(
+                request.apiKey()
+        ));
+        if (Objects.requireNonNull(isValid.getBody()).getResult().isValid()) {
+            Map<String, Object> data = new HashMap<>() {{
+                put("partnerCode", request.partnerCode());
+                put("requestId", "Request_ID_" + CommonUtil.getCurrentTimeString("yyMMdd") + new Random().nextInt(10000));
+                put("orderId", System.currentTimeMillis());
+                put("amount", request.amount());
+                put("transId", request.transId());
+                put("description", request.description() != null ? request.description() : "");
+                put("lang", request.lang());
+            }};
 
-        String rawData = String.format(
-                "accessKey=%s&amount=%s&description=%s&orderId=%s&partnerCode=%s&requestId=%s&transId=%s",
-                request.accessKey(), data.get("amount"), data.get("description"),
-                data.get("orderId"), data.get("partnerCode"), data.get("requestId"),
-                data.get("transId")
-        );
+            String rawData = String.format(
+                    "accessKey=%s&amount=%s&description=%s&orderId=%s&partnerCode=%s&requestId=%s&transId=%s",
+                    request.accessKey(), data.get("amount"), data.get("description"),
+                    data.get("orderId"), data.get("partnerCode"), data.get("requestId"),
+                    data.get("transId")
+            );
 
-        String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, request.secretKey(), rawData);
-        data.put("signature", signature);
+            String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, request.secretKey(), rawData);
+            data.put("signature", signature);
 
-        System.out.println("rawData: " + rawData);
+            System.out.println("rawData: " + rawData);
 
-        try{
-            ResponseEntity<String> response = moMoClient.refundMoMo(data);
-            JSONObject result = new JSONObject(response.getBody());
-            createPaymentLog(PaymentGatewayRequest.builder()
-                    .requestUrl(momoRefund)
-                    .context("refund MoMo")
-                    .status(Status.SUCCEED)
-                    .transactionId((data.get("transId")).toString())
-                    .build());
-
-            return result.toMap();
-        }catch (Exception e){
-            createPaymentLog(PaymentGatewayRequest.builder()
-                    .requestUrl(momoRefund)
-                    .context("refund MoMo")
-                    .status(Status.FAILED)
-                    .transactionId((data.get("transId")).toString())
-                    .build());
-            throw new CustomException(StatusCode.FAILED, "Refund MoMo failed");
+            ResponseEntity<ApiResponse<TransactionResponse>> transaction = transactionServiceClient.getTransactionByOrderId(data.get("orderId").toString());
+            if (Objects.requireNonNull(transaction.getBody()).getResult() != null) {
+                try {
+                    ResponseEntity<String> response = moMoClient.refundMoMo(data);
+                    JSONObject result = new JSONObject(response.getBody());
+                    createPaymentLog(PaymentGatewayRequest.builder()
+                            .requestUrl(momoRefund)
+                            .context("refund MoMo")
+                            .status(Status.SUCCEED)
+                            .transactionId(transaction.getBody().getResult().id().toString())
+                            .build());
+                    transactionServiceClient.upddateTransaction(UpdateTransactionStatusRequest.builder()
+                                    .transactionId(transaction.getBody().getResult().id())
+                                    .status(com.hpbt.paymentgatewayservice.dto.requests.Status.REFUND)
+                            .build());
+                    return result.toMap();
+                } catch (Exception e) {
+                    createPaymentLog(PaymentGatewayRequest.builder()
+                            .requestUrl(momoRefund)
+                            .context("refund MoMo")
+                            .status(Status.FAILED)
+                            .transactionId(transaction.getBody().getResult().id().toString())
+                            .build());
+                    throw new CustomException(StatusCode.FAILED, "Refund MoMo failed");
+                }
+            }
         }
+        throw new CustomException(StatusCode.FAILED, "Refund MoMo failed");
     }
 
     @Override
@@ -320,7 +380,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
             map.add(entry.getKey(), String.valueOf(entry.getValue()));
         }
 
-        try{
+        try {
             ResponseEntity<String> response = zaloPayClientV2.createZalopayV2(map);
             JSONObject result = new JSONObject(response.getBody());
             createPaymentLog(PaymentGatewayRequest.builder()
@@ -330,7 +390,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
                     .transactionId((data.get("app_trans_id")).toString())
                     .build());
             return result.toMap();
-        }catch(Exception e){
+        } catch (Exception e) {
             createPaymentLog(PaymentGatewayRequest.builder()
                     .requestUrl(zalopayV2Create)
                     .context("create ZaloPay")
@@ -357,7 +417,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
         for (Map.Entry<String, Object> entry : data.entrySet()) {
             map.add(entry.getKey(), String.valueOf(entry.getValue()));
         }
-        try{
+        try {
             ResponseEntity<String> response = zaloPayClientV2.queryZalopayV2(map);
             JSONObject result = new JSONObject(response.getBody());
             createPaymentLog(PaymentGatewayRequest.builder()
@@ -367,7 +427,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
                     .transactionId((data.get("app_trans_id")).toString())
                     .build());
             return result.toMap();
-        }catch (Exception e){
+        } catch (Exception e) {
             createPaymentLog(PaymentGatewayRequest.builder()
                     .requestUrl(zalopayV2Query)
                     .context("query ZaloPay")
@@ -418,7 +478,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
             map.add(entry.getKey(), String.valueOf(entry.getValue()));
         }
 
-        try{
+        try {
             ResponseEntity<String> response = zaloPayClientV2.refundZalopayV2(map);
             JSONObject result = new JSONObject(response.getBody());
 
@@ -432,7 +492,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
                     .build());
 
             return resultMap;
-        }catch(Exception e){
+        } catch (Exception e) {
             createPaymentLog(PaymentGatewayRequest.builder()
                     .requestUrl(zalopayV2Refund)
                     .context("refund ZaloPay")
@@ -466,7 +526,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
         for (Map.Entry<String, Object> entry : data.entrySet()) {
             map.add(entry.getKey(), String.valueOf(entry.getValue()));
         }
-        try{
+        try {
             ResponseEntity<String> response = zaloPayClientV2.queryRefundZalopayV2(map);
             JSONObject result = new JSONObject(response.getBody());
             createPaymentLog(PaymentGatewayRequest.builder()
@@ -477,7 +537,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
                     .build());
 
             return result.toMap();
-        }catch (Exception e){
+        } catch (Exception e) {
             createPaymentLog(PaymentGatewayRequest.builder()
                     .requestUrl(zalopayV2QueryRefund)
                     .context("query refund ZaloPay")

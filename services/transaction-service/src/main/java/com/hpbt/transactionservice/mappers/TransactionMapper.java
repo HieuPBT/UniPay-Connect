@@ -18,8 +18,7 @@ public class TransactionMapper {
                 transaction.getCurrency(),
                 transaction.getStatus(),
                 transaction.getOrderId(),
-                transaction.getCreatedAt(),
-                transaction.getPaymentType()
+                transaction.getCreatedAt()
         );
     }
 

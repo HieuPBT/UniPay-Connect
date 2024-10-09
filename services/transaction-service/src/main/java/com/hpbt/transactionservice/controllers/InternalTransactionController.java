@@ -1,6 +1,7 @@
 package com.hpbt.transactionservice.controllers;
 
 import com.hpbt.transactionservice.dto.requests.TransactionRequest;
+import com.hpbt.transactionservice.dto.requests.UpdateTransactionStatusRequest;
 import com.hpbt.transactionservice.dto.responses.ApiResponse;
 import com.hpbt.transactionservice.dto.responses.TransactionResponse;
 import com.hpbt.transactionservice.services.TransactionService;
@@ -9,10 +10,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,5 +22,15 @@ public class InternalTransactionController {
     @PostMapping("/create-transaction")
     public ResponseEntity<ApiResponse<TransactionResponse>> createTransaction(@RequestBody @Valid TransactionRequest transactionRequest) {
         return ResponseEntity.ok(ApiResponse.success(transactionService.createTransaction(transactionRequest)));
+    }
+
+    @PostMapping("/update-transaction")
+    public ResponseEntity<ApiResponse<TransactionResponse>> updateTransaction(@RequestBody @Valid UpdateTransactionStatusRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(transactionService.updateTransaction(request)));
+    }
+
+    @GetMapping("/get-transaction-by-orderId")
+    public ResponseEntity<ApiResponse<TransactionResponse>> getTransactionByOrderId(@RequestParam("orderId") String orderId) {
+        return ResponseEntity.ok(ApiResponse.success(transactionService.getTransactionByOrderId(orderId)));
     }
 }
