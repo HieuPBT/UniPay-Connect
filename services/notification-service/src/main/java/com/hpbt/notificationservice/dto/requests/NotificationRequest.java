@@ -1,10 +1,10 @@
 package com.hpbt.notificationservice.dto.requests;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.hpbt.event.MoneyRefund;
 import com.hpbt.event.UserRegisterInfo;
 import com.hpbt.notificationservice.entities.NotificationStatus;
 import com.hpbt.notificationservice.entities.NotificationType;
-import com.hpbt.notificationservice.entities.RefundInfo;
 import lombok.Builder;
 
 @Builder
@@ -14,6 +14,6 @@ public record NotificationRequest(
         NotificationStatus notificationStatus,
         NotificationType notificationType,
         UserRegisterInfo userRegisterInfo,
-        RefundInfo refundInfo
+        MoneyRefund refundInfo
 ) {
 }
