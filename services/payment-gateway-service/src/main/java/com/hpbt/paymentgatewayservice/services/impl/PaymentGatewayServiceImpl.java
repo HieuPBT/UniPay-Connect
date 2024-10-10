@@ -1,5 +1,6 @@
 package com.hpbt.paymentgatewayservice.services.impl;
 
+import com.hpbt.event.MoneyRefund;
 import com.hpbt.paymentgatewayservice.clients.MoMoClient;
 import com.hpbt.paymentgatewayservice.clients.TransactionServiceClient;
 import com.hpbt.paymentgatewayservice.clients.UserServiceClient;
@@ -26,14 +27,17 @@ import com.hpbt.paymentgatewayservice.utils.zalopay.crypto.HMACUtil;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -41,19 +45,20 @@ import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class PaymentGatewayServiceImpl implements PaymentGatewayService {
-    final PaymentLogMapper paymentLogMapper;
+    PaymentLogMapper paymentLogMapper;
 
-    final PaymentGatewayRepository paymentGatewayRepository;
+    PaymentGatewayRepository paymentGatewayRepository;
 
-    final ZaloPayClientV2 zaloPayClientV2;
+    ZaloPayClientV2 zaloPayClientV2;
 
-    final MoMoClient moMoClient;
+    MoMoClient moMoClient;
 
-    final TransactionServiceClient transactionServiceClient;
-    private final UserServiceClient userServiceClient;
+    TransactionServiceClient transactionServiceClient;
+    UserServiceClient userServiceClient;
+    KafkaTemplate<String, Object> kafkaTemplate;
 
 //    @Value("${zalopay.version1.key.appId}")
 //    int zalopayV1AppId;
@@ -82,27 +87,35 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 //    @Value("${zalopay.version2.url.sandbox}")
 //    String zalopayV2Sandbox;
 
+    @NonFinal
     @Value("${zalopay.version2.path.create}")
     String zalopayV2Create;
 
+    @NonFinal
     @Value("${momo.path.create}")
     String momoCreate;
 
+    @NonFinal
     @Value("${momo.path.query}")
     String momoQuery;
 
+    @NonFinal
     @Value("${momo.path.confirm}")
     String momoConfirm;
 
+    @NonFinal
     @Value("${momo.path.refund}")
     String momoRefund;
 
+    @NonFinal
     @Value("${zalopay.version2.path.query}")
     String zalopayV2Query;
 
+    @NonFinal
     @Value("${zalopay.version2.path.refund}")
     String zalopayV2Refund;
 
+    @NonFinal
     @Value("${zalopay.version2.path.query-refund}")
     String zalopayV2QueryRefund;
 
@@ -170,6 +183,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
                             .transactionId(transaction.getBody().getResult().id())
                             .status(com.hpbt.paymentgatewayservice.dto.requests.Status.SUCCEED)
                             .build());
+
                     return result.toMap();
                 } catch (Exception e) {
                     createPaymentLog(PaymentGatewayRequest.builder()
@@ -302,6 +316,9 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
         ResponseEntity<ApiResponse<ValidateAccessKeyResponse>> isValid = userServiceClient.validateApiKey(new ValidateApiKeyRequest(
                 request.apiKey()
         ));
+        ResponseEntity<ApiResponse<UserResponse>> userResponse = userServiceClient.findUserByApiKey(new ValidateApiKeyRequest(
+                request.apiKey()
+        ));
         if (Objects.requireNonNull(isValid.getBody()).getResult().isValid()) {
             Map<String, Object> data = new HashMap<>() {{
                 put("partnerCode", request.partnerCode());
@@ -341,6 +358,16 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
                     transactionServiceClient.upddateTransaction(UpdateTransactionStatusRequest.builder()
                                     .transactionId(transaction.getBody().getResult().id())
                                     .status(com.hpbt.paymentgatewayservice.dto.requests.Status.REFUND)
+                            .build());
+                    kafkaTemplate.send("money-refund", MoneyRefund
+                            .builder()
+                            .email(userResponse.getBody().getResult().email())
+                            .username(userResponse.getBody().getResult().username())
+                            .amount(request.amount())
+                            .refundDate(Instant.now())
+                            .orderId(data.get("orderId").toString())
+                            .method("momo")
+                            .id(userResponse.getBody().getResult().id().longValue())
                             .build());
                     return result.toMap();
                 } catch (Exception e) {

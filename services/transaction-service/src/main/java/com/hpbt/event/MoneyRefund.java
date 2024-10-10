@@ -1,6 +1,5 @@
 package com.hpbt.event;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 
 public record MoneyRefund(
@@ -9,7 +8,7 @@ public record MoneyRefund(
         String email,
         Long amount,
         String orderId,
-        Instant refundDate,
+        LocalDateTime refundDate,
         String method
 ) {
 }

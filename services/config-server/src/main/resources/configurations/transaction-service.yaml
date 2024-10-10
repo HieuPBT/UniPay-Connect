@@ -15,6 +15,15 @@ spring:
     password: ${spring.datasource.password}
     baseline-version: 0
     baseline-description: "init database"
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092
+      group-id: transaction-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: '*'
     
 
 feign:

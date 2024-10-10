@@ -1,5 +1,6 @@
 package com.hpbt.notificationservice.entities;
 
+import com.hpbt.event.MoneyRefund;
 import com.hpbt.event.UserRegisterInfo;
 import lombok.*;
 import lombok.experimental.FieldNameConstants;
@@ -7,6 +8,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Document
@@ -25,10 +27,12 @@ public class Notification {
 
     NotificationType notificationType;
 
-    RefundInfo refundInfo;
+    MoneyRefund refundInfo;
 
     UserRegisterInfo userRegisterInfo;
 
+    Instant sentAt;
+
     @CreatedDate
-    LocalDateTime createdAt;
+    Instant createdAt;
 }

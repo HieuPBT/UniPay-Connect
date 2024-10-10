@@ -1,7 +1,8 @@
 spring:
   data:
     mongodb:
-      uri: mongodb://root:admin@localhost:27017/notification-service?authSource=admin
+#      uri: mongodb://root:admin@localhost:27017/notification-service?authSource=admin
+      uri: mongodb://root:Admin%40123@localhost:27018/notification-service?authSource=admin
 #    mongodb:
 #      username: root
 #      password: admin
