@@ -41,7 +41,6 @@ public class AuthenticationService {
         User user = userRepository.findByUsername(authenticationRequest.username()).orElseThrow(
                 () -> new CustomException(StatusCode.USER_NOT_FOUND, "User with usename " + authenticationRequest.username() + " not found")
         );
-
         var jwtToken = jwtService.generateJwtToken(user);
         return userMapper.toAuthenticationResponse(jwtToken);
 //        return null;

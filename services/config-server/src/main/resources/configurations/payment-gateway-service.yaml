@@ -23,7 +23,7 @@ spring:
 
 feign:
   url:
-    user-service: http://localhost:8090/internal/v1/user
+    user-service: http://localhost:8090/internal/user
     notification-service: http://localhost:8093/api/v1/notification
     transaction-service: http://localhost:8092/internal/v1/transaction
 

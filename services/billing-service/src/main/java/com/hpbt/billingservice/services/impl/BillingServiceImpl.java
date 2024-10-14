@@ -15,8 +15,12 @@ import com.hpbt.billingservice.services.BillingService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -84,5 +88,17 @@ public class BillingServiceImpl implements BillingService {
                 .stream().map(billingMapper::toBillingResponse)
                 .collect(Collectors.toList());
         return billingResponses;
+    }
+
+    @Override
+    public Page<BillingResponse> getAllBillingByUserId(Long userId, Instant startDate, Instant endDate, Pageable pageable) {
+        Page<Billing> billings = billingRepository.findAllByUserId(userId, startDate, endDate, pageable);
+
+        List<BillingResponse> billingResponses = billings.getContent()
+                .stream()
+                .map(billingMapper::toBillingResponse)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(billingResponses, pageable, billings.getTotalElements());
     }
 }

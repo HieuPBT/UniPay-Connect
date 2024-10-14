@@ -24,7 +24,9 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: '*'
-    
+
+jwt:
+  signerKey: "Rz3CoupHfEC7kwpbydPqXDcoOqd9Ws9KeYUUASkUErg="
 
 feign:
   url:

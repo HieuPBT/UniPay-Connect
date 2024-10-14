@@ -3,6 +3,9 @@ package com.hpbt.billingservice.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.Instant;
 
 @Entity
 @Data
@@ -32,4 +35,8 @@ public class Billing {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     BillingStatus status;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false)
+    Instant createdAt;
 }
