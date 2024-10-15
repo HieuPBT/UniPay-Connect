@@ -56,11 +56,11 @@ export const _account = [
       </SvgIcon>
     ),
   },
-  {
-    label: 'Security',
-    href: '#',
-    icon: <Iconify icon="solar:shield-keyhole-bold-duotone" />,
-  },
+  // {
+  //   label: 'Security',
+  //   href: '#',
+  //   icon: <Iconify icon="solar:shield-keyhole-bold-duotone" />,
+  // },
   {
     label: 'Account settings',
     href: '#',

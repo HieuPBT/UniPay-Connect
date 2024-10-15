@@ -10,7 +10,7 @@ export const _workspaces = [
     plan: 'Free',
   },
   {
-    id: 'team-2',
+  id: 'team-2',
     name: 'Team 2',
     logo: `${CONFIG.site.basePath}/assets/icons/workspaces/logo-2.webp`,
     plan: 'Pro',

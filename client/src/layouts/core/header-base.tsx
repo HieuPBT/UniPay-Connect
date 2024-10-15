@@ -138,8 +138,8 @@ export function HeaderBase({
             {/* -- Divider -- */}
             <StyledDivider data-slot="divider" />
 
-            {/* -- Workspace popover -- */}
-            {workspaces && <WorkspacesPopover data-slot="workspaces" data={data?.workspaces} />}
+            {/* -- Workspace popover --
+            {workspaces && <WorkspacesPopover data-slot="workspaces" data={data?.workspaces} />} */}
 
             {slots?.leftAreaEnd}
           </>
@@ -180,8 +180,8 @@ export function HeaderBase({
                 <NotificationsDrawer data-slot="notifications" data={data?.notifications} />
               )}
 
-              {/* -- Contacts popover -- */}
-              {contacts && <ContactsPopover data-slot="contacts" data={data?.contacts} />}
+              {/* -- Contacts popover --
+              {contacts && <ContactsPopover data-slot="contacts" data={data?.contacts} />} */}
 
               {/* -- Settings button -- */}
               {settings && <SettingsButton data-slot="settings" />}
@@ -193,7 +193,7 @@ export function HeaderBase({
               {signIn && <SignInButton />}
 
               {/* -- Purchase button -- */}
-              {purchase && (
+              {/* {purchase && (
                 <Button
                   data-slot="purchase"
                   variant="contained"
@@ -207,7 +207,7 @@ export function HeaderBase({
                 >
                   Purchase
                 </Button>
-              )}
+              )} */}
             </Box>
 
             {slots?.rightAreaEnd}
