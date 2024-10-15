@@ -31,7 +31,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user")
 @Slf4j
-public class UserController {
+public class PublicController {
     private final UserService userService;
     private final AccessKeyService accessKeyService;
     private final UserMapper userMapper;
@@ -50,6 +50,25 @@ public class UserController {
                 .code(StatusCode.CREATED.getCode())
                 .message(StatusCode.CREATED.getMessage())
                 .result(user).build());
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/")
+    public ResponseEntity<ApiResponse<?>> getAllUser(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<UserResponse> userResponses = userService.getAllUsers(pageable);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("page", userResponses.getNumber());
+        data.put("size", userResponses.getSize());
+        data.put("total", userResponses.getTotalPages());
+        data.put("users", userResponses.getContent());
+
+        return ResponseEntity.ok(ApiResponse.success(data));
     }
 
     @GetMapping("/{id}")

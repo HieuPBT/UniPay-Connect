@@ -41,13 +41,13 @@ public record MoMoCreateRequest(
         @NotBlank(message = "lang cannot be blank")
         String lang,
 
-        @NotNull(message = "accessKey cannot be null")
-        @NotBlank(message = "accessKey cannot be blank")
-        String accessKey,
-
-        @NotNull(message = "secretKey cannot be null")
-        @NotBlank(message = "secretKey cannot be blank")
-        String secretKey,
+//        @NotNull(message = "accessKey cannot be null")
+//        @NotBlank(message = "accessKey cannot be blank")
+//        String accessKey,
+//
+//        @NotNull(message = "secretKey cannot be null")
+//        @NotBlank(message = "secretKey cannot be blank")
+//        String secretKey
 
         @NotNull(message = "ApiKey cannot be null")
         @NotBlank(message = "ApiKey cannot be blank")

@@ -2,6 +2,8 @@ package com.hpbt.userservice.dto.responses;
 
 import com.hpbt.userservice.entities.UserRole;
 
+import java.time.LocalDateTime;
+
 public record UserResponse(
         Integer id,
         String username,
@@ -9,6 +11,9 @@ public record UserResponse(
         String email,
         String phoneNumber,
         String avatar,
-        UserRole role
+        UserRole role,
+        Boolean active,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {
 }

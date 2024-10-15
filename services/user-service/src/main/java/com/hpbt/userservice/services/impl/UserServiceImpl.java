@@ -108,10 +108,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Set<UserResponse> getAllUsers() {
-//        return Set(userMapper.toUserResponse(userRepository.findAllByOrderByIdDesc());
-        return null;
+    public Page<UserResponse> getAllUsers(Pageable pageable) {
+        Page<User> users = userRepository.findAllBy(pageable);
+
+        List<UserResponse> userResponses = users.getContent()
+                .stream()
+                .map(userMapper::toUserResponse)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(userResponses, pageable, users.getTotalElements());
     }
+
 
 //    public AuthenticationResponse authenticateUser(AuthenticationRequest authenticationRequest) {
 //        User user = userRepository.findByUsername(authenticationRequest.username())
