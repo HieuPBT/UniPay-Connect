@@ -43,6 +43,7 @@ export const endpoints = {
   user: {
     currentUserTransaction: '/api/v1/transaction/get-transactions/current-user',
     currentUserAccessKey: '/api/v1/user/access-key/current-user',
+    allUser: '/api/v1/user/',
   },
   accessKey: {
     create: '/api/v1/user/create-api-key',

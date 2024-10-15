@@ -2,7 +2,7 @@
  * @type {import('next').NextConfig}
  */
 
-const isStaticExport = 'false';
+const isStaticExport = process.env.BUILD_STATIC_EXPORT || 'false';
 
 const nextConfig = {
   trailingSlash: true,
@@ -21,6 +21,9 @@ const nextConfig = {
       transform: '@mui/lab/{{member}}',
     },
   },
+  images: {
+    domains: ['res.cloudinary.com'], // Add Cloudinary as an allowed image source
+  },
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
@@ -30,7 +33,7 @@ const nextConfig = {
     return config;
   },
   ...(isStaticExport === 'true' && {
-    output: 'export',
+    output: 'export', // Enables static export if isStaticExport is true
   }),
 };
 
