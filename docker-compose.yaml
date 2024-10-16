@@ -1,0 +1,110 @@
+services:
+  # POSTGRES DB
+  postgres:
+    container_name: ms_pg_db
+    image: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: Admin@123
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - pgdb:/var/lib/postgresql/data
+    ports:
+      - 5433:5432
+    networks:
+      - microservices
+  # PGADMIN
+#  pgadmin:
+#    container_name: postgres_admin
+#    image: dpage/pgadmin4
+#    restart: unless-stopped
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin@pgadmin.org}
+#      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-Admin@123}
+#      PGADMIN_CONFIG_SERVER_MODE: 'False'
+#    volumes:
+#      - pgadmin:/var/lib/pgadmins
+#    ports:
+#      - 5050:80
+#    networks:
+#      - microservices
+  # MONGODB
+  mongo:
+    container_name: mongodb
+    restart: unless-stopped
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    volumes:
+      - mgdb:/data
+    ports:
+      - 27017:27017
+    networks:
+      - microservices
+
+  # MONGO EXPRESS
+#  mongo-express:
+#    container_name: ms_mongo_express
+#    image: mongo-express
+#    restart: unless-stopped
+#    environment:
+#      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+#      ME_CONFIG_MONGODB_ADMINPASSWORD: admin
+#      ME_CONFIG_BASICAUTH: false
+#      ME_CONFIG_MONGODB_SERVER: mongo
+#    ports:
+#      - 8050:8081
+#    networks:
+#      - microservices
+
+   # Zookeepr
+  zookeeper:
+    image: confluentinc/cp-zookeeper
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    restart: unless-stopped
+    ports:
+      - 2181:2181
+    networks:
+      - microservices
+
+  # KaFka
+  kafka:
+    image: confluentinc/cp-kafka
+    container_name: ms_kafka
+    ports:
+      - 9092:9092
+    depends_on:
+      - zookeeper
+    restart: unless-stopped
+    environment:
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+    networks:
+      - microservices
+  # Mail-dev - FakeSMTP
+  mail-dev:
+    container_name: ms_mail_dev
+    image: maildev/maildev
+    ports:
+      - 1080:1080
+      - 1025:1025
+    restart: unless-stopped
+
+networks:
+  microservices:
+    driver: bridge
+
+volumes:
+  pgdb:
+  pgadmin:
+  mgdb:
+  mgexpress:

@@ -1,15 +1,17 @@
 package com.hpbt.userservice.configs;
 
-import com.hpbt.userservice.security.CustomUserDetailService;
-import com.hpbt.userservice.security.JwtAuthenticationFilter;
+import com.hpbt.userservice.security.*;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -27,10 +29,14 @@ import javax.crypto.spec.SecretKeySpec;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class SpringSecurityConfig{
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+@EnableMethodSecurity
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class SpringSecurityConfig {
+    JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    private final CustomUserDetailService customUserDetailService;
+    ApiKeyAuthenticationFilter apiKeyAuthenticationFilter;
+
+    CustomUserDetailService customUserDetailService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -51,38 +57,28 @@ public class SpringSecurityConfig{
         return authenticationConfiguration.getAuthenticationManager();
     }
 
+    @NonFinal
     @Value("${jwt.signerKey}")
-    private String signerKey;
-
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http.csrf(AbstractHttpConfigurer::disable)
-//                .authorizeHttpRequests(requests -> requests
-////                        .requestMatchers("/api/v1/user/**").authenticated()
-////                        .requestMatchers("/eureka/**").permitAll()
-//                        .requestMatchers("/api/v1/login").permitAll()
-//                        .anyRequest().authenticated())
-//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-//
-////        http.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder())));
-//
-//        http.authenticationProvider(daoAuthenticationProvider());
-//
-//        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-//        return http.build();
-//    }
+    String signerKey;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/api/v1/login").permitAll()  // Cho phép truy cập tự do vào /login
+        http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(requests -> requests.requestMatchers("/api/v1/login").permitAll()
+                        .requestMatchers("/api/v1/user/register").permitAll()
+                                .requestMatchers("/api/authentication/**").permitAll()
+                                .requestMatchers("/api/v1/user/validate-api-key").permitAll()
+                                .requestMatchers("/internal/user/**").permitAll()
+                        .requestMatchers("/api/v1/user/hello").permitAll()
                         .anyRequest().authenticated()  // Các yêu cầu khác cần xác thực
-                )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        ).exceptionHandling(exceptionHandling -> exceptionHandling
+
+                .authenticationEntryPoint(new JwtAuthenticationEntryPoint()) // Bắt lỗi khi không đăng nhập
+                .accessDeniedHandler(new CustomAccessDeniedHandler()) // Bắt lỗi khi không có quyền truy cập
+        ).sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(daoAuthenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+//                .addFilterBefore(apiKeyAuthenticationFilter, JwtAuthenticationFilter.class);
         // Sử dụng DaoAuthenticationProvider để xác thực
 //        http.authenticationProvider(daoAuthenticationProvider());
 
@@ -96,8 +92,6 @@ public class SpringSecurityConfig{
     @Bean
     public JwtDecoder jwtDecoder() {
         SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(), "HS512");
-        return NimbusJwtDecoder.withSecretKey(secretKeySpec)
-                .macAlgorithm(MacAlgorithm.HS512)
-                .build();
+        return NimbusJwtDecoder.withSecretKey(secretKeySpec).macAlgorithm(MacAlgorithm.HS512).build();
     }
 }

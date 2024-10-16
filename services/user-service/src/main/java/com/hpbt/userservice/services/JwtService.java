@@ -11,11 +11,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.StringJoiner;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +27,7 @@ public class JwtService {
     private String jwtSecret;
 
     public String generateJwtToken(User user) throws JOSEException {
+        CustomUserDetails customUserDetails = new CustomUserDetails(user);
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getUsername())
                 .issueTime(new Date(
@@ -32,6 +35,8 @@ public class JwtService {
                 ))
                 .expirationTime(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
                 .claim("username", user.getUsername())
+                .claim("userId", user.getId())
+                .claim("scope", buildScope(customUserDetails))
                 .build();
 
 //        .expirationTime(new Date(
@@ -71,6 +76,11 @@ public class JwtService {
         return claimsSet.getStringClaim("username");
     }
 
+    public String buildScope(CustomUserDetails customUserDetails) {
+        StringJoiner scopeJoiner = new StringJoiner(" ");
+        if(!CollectionUtils.isEmpty(customUserDetails.getAuthorities()))
+            customUserDetails.getAuthorities().forEach(authority -> scopeJoiner.add(authority.getAuthority()));
 
-
+        return scopeJoiner.toString();
+    }
 }

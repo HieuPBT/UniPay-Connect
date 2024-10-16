@@ -1,0 +1,74 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/paymentservice
+    username: postgres
+    password: Admin@123
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    baseline-version: 0
+    baseline-description: "init database"
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+feign:
+  url:
+    user-service: http://localhost:8090/internal/user
+    notification-service: http://localhost:8093/api/v1/notification
+    transaction-service: http://localhost:8092/internal/v1/transaction
+
+
+momo:
+  url:
+    sandbox: https://test-payment.momo.vn
+    production: https://payment.momo.vn
+  path:
+    create: /v2/gateway/api/create
+    query: /v2/gateway/api/query
+    confirm: /v2/gateway/api/confirm
+    refund: /v2/gateway/api/refund
+  key:
+    access-key: F8BBA842ECF85
+    secret-key: K951B6PE1waDMi640xX08PD3vg6EkVlz
+
+zalopay:
+  version1:
+    url:
+      sandbox: https://sandbox.zalopay.com.vn
+      production: https://zalopay.com.vn
+    path:
+      create: /v001/tpe/createorder
+      query: /v001/tpe/getstatusbyapptransid
+      refund: /v001/tpe/partialrefund
+      query-refund: /v001/tpe/getpartialrefundstatus
+    key:
+      appId: 553
+      key1: 9phuAOYhan4urywHTh0ndEXiV3pKHr5Q
+      key2: Iyz2habzyr7AG8SgvoBCbKwKi3UzlLi3
+  version2:
+    url:
+      sandbox: https://sb-openapi.zalopay.vn
+      production: https://openapi.zalopay.vn
+    path:
+      create: /v2/create
+      query: /v2/query
+      refund: /v2/refund
+      query-refund: /v2/query_refund
+    key:
+      appId: 2553
+      key1: PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL
+      key2: kLtgPl8HHhfvMuDHPwKfgfsY4Ydm9eIz
+
+
+server:
+  port: 8091
