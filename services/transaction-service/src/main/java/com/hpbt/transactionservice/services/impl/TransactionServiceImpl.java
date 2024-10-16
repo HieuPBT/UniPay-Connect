@@ -17,11 +17,18 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,11 +43,11 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public TransactionResponse createTransaction(TransactionRequest request) {
-        ResponseEntity<ApiResponse<Boolean>> response = userServiceClient.isValidUser(request.userId());
-
-        if(response == null || !Boolean.TRUE.equals(Objects.requireNonNull(response.getBody()).getResult())){
-            throw new CustomException(StatusCode.USER_NOT_FOUND, StatusCode.USER_NOT_FOUND.getMessage());
-        }
+//        ResponseEntity<ApiResponse<Boolean>> response = userServiceClient.isValidUser(request.userId());
+//
+//        if(response == null || !Boolean.TRUE.equals(Objects.requireNonNull(response.getBody()).getResult())){
+//            throw new CustomException(StatusCode.USER_NOT_FOUND, StatusCode.USER_NOT_FOUND.getMessage());
+//        }
 
         PaymentTypes paymentTypes = paymentTypesRepository.findById(request.paymentTypeId()).orElseThrow(
                 () -> new CustomException(StatusCode.BAD_REQUEST, StatusCode.BAD_REQUEST.getMessage())
@@ -71,4 +78,18 @@ public class TransactionServiceImpl implements TransactionService {
                 ));
         return transactionMapper.toTransactionResponse(transaction);
     }
+
+    @Override
+    public Page<TransactionResponse> getAllTransactionsByUserId(Integer userId, Pageable pageable) {
+        Page<Transaction> transactionsPage = transactionRepository.findAllByUserId(userId, pageable);
+
+        // Map transactions to transaction responses
+        List<TransactionResponse> transactionResponses = transactionsPage.getContent()
+                .stream()
+                .map(transactionMapper::toTransactionResponse)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(transactionResponses, pageable, transactionsPage.getTotalElements());
+    }
+
 }

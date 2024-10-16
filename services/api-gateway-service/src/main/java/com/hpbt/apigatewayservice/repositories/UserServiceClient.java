@@ -11,4 +11,7 @@ import reactor.core.publisher.Mono;
 public interface UserServiceClient {
     @PostExchange(url = "/api/v1/user/validate-api-key", contentType = MediaType.APPLICATION_JSON_VALUE)
     Mono<ApiResponse<ValidateAccessKeyResponse>> validateApiKey(@RequestBody ValidateApiKeyRequest validateApiKeyRequest);
+
+    @PostExchange(url = "/internal/user/validate-jwt-token", contentType = MediaType.APPLICATION_JSON_VALUE)
+    Mono<ApiResponse<ValidateAccessKeyResponse>> validateJwtToken(@RequestBody ValidateApiKeyRequest request);
 }

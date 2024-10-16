@@ -88,6 +88,14 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 //    String zalopayV2Sandbox;
 
     @NonFinal
+    @Value("${momo.key.access-key}")
+    String momoAccessKey;
+
+    @NonFinal
+    @Value("${momo.key.secret-key}")
+    String momoSecretKey;
+
+    @NonFinal
     @Value("${zalopay.version2.path.create}")
     String zalopayV2Create;
 
@@ -148,13 +156,13 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 
             String rawData = String.format(
                     "accessKey=%s&amount=%s&extraData=%s&ipnUrl=%s&orderId=%s&orderInfo=%s&partnerCode=%s&redirectUrl=%s&requestId=%s&requestType=%s",
-                    request.accessKey(), data.get("amount"),
+                    momoAccessKey, data.get("amount"),
                     data.get("extraData"), data.get("ipnUrl"), data.get("orderId"),
                     data.get("orderInfo"), data.get("partnerCode"), data.get("redirectUrl"),
                     data.get("requestId"), data.get("requestType")
             );
 
-            String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, request.secretKey(), rawData);
+            String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, momoSecretKey, rawData);
             data.put("signature", signature);
 
             System.out.println("Request data: " + data);
@@ -220,11 +228,11 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 
             String rawData = String.format(
                     "accessKey=%s&orderId=%s&partnerCode=%s&requestId=%s",
-                    request.accessKey(), data.get("orderId"),
+                    momoAccessKey, data.get("orderId"),
                     data.get("partnerCode"), data.get("requestId")
             );
 
-            String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, request.secretKey(), rawData);
+            String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, momoSecretKey, rawData);
             data.put("signature", signature);
 
             ResponseEntity<ApiResponse<TransactionResponse>> transaction = transactionServiceClient.findTransactionByOrderId(new FindTransactionByOrderIdRequest(
@@ -274,12 +282,12 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 
             String rawData = String.format(
                     "accessKey=%s&amount=%s&description=%s&orderId=%s&partnerCode=%s&requestId=%s&requestType=%s",
-                    request.accessKey(), data.get("amount"), data.get("description"),
+                    momoAccessKey, data.get("amount"), data.get("description"),
                     data.get("orderId"), data.get("partnerCode"), data.get("requestId"),
                     data.get("requestType")
             );
 
-            String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, request.secretKey(), rawData);
+            String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, momoSecretKey, rawData);
             data.put("signature", signature);
 
             System.out.println("rawData: " + rawData);
@@ -332,12 +340,12 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 
             String rawData = String.format(
                     "accessKey=%s&amount=%s&description=%s&orderId=%s&partnerCode=%s&requestId=%s&transId=%s",
-                    request.accessKey(), data.get("amount"), data.get("description"),
+                    momoAccessKey, data.get("amount"), data.get("description"),
                     data.get("orderId"), data.get("partnerCode"), data.get("requestId"),
                     data.get("transId")
             );
 
-            String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, request.secretKey(), rawData);
+            String signature = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, momoSecretKey, rawData);
             data.put("signature", signature);
 
             System.out.println("rawData: " + rawData);

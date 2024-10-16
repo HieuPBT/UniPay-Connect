@@ -11,6 +11,7 @@ public record AccessKeyResponse(
         String apiKey,
         Status status,
         LocalDateTime expires_at,
-        LocalDateTime revoked_at
+        LocalDateTime revoked_at,
+        LocalDateTime created_at
 ) {
 }
