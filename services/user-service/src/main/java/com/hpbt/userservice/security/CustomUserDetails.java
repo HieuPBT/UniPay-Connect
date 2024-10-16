@@ -1,8 +1,10 @@
 package com.hpbt.userservice.security;
 
 import com.hpbt.userservice.entities.User;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,11 +15,18 @@ import java.util.Collections;
 import java.util.List;
 
 
+@Getter
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CustomUserDetails implements UserDetails {
-    private final User user;
+    User user;
 
     public CustomUserDetails(User user) {
         this.user = user;
+    }
+
+    public Integer getUserId(){
+        return user.getId();
     }
 
     @Override

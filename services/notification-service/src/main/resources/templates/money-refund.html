@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông Báo Hoàn Tiền</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        table {
+            border-spacing: 0;
+            width: 100%;
+            margin: 0 auto;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            background-color: #ffffff;
+            margin: 20px auto;
+            border: 1px solid #dddddd;
+        }
+        .header {
+            background-color: #ff5722;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 20px;
+            text-align: left;
+        }
+        .content h2 {
+            color: #333333;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .content p {
+            color: #666666;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .details {
+            margin-top: 20px;
+        }
+        .details table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .details th, .details td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #dddddd;
+        }
+        .footer {
+            background-color: #f1f1f1;
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            color: #666666;
+        }
+    </style>
+</head>
+<body>
+<table role="presentation" class="container">
+    <tr>
+        <td class="header">
+            <h1>Thông Báo Hoàn Tiền</h1>
+        </td>
+    </tr>
+    <tr>
+        <td class="content">
+            <h2 th:text="'Xin chào ' + ${username} + ','">Xin chào [Tên người dùng],</h2>
+            <p>Chúng tôi xin thông báo rằng yêu cầu hoàn tiền của bạn đã được xử lý thành công. Dưới đây là chi tiết về khoản hoàn tiền:</p>
+
+            <div class="details">
+                <table>
+                    <tr>
+                        <th>Đơn hàng:</th>
+                        <td th:text="${orderId}">#123456</td>
+                    </tr>
+                    <tr>
+                        <th>Số tiền:</th>
+                        <td th:text="${amount}">$50.00</td>
+                    </tr>
+                    <tr>
+                        <th>Ngày hoàn tiền:</th>
+                        <td th:text="${refundDate}">01/04/2024</td>
+                    </tr>
+                    <tr>
+                        <th>Phương thức hoàn tiền:</th>
+                        <td th:text="${method}">Thẻ tín dụng</td>
+                    </tr>
+                </table>
+            </div>
+
+            <p>Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với đội ngũ hỗ trợ của chúng tôi.</p>
+            <p>Chân thành cảm ơn bạn đã sử dụng dịch vụ của UniPay-Connect!</p>
+        </td>
+    </tr>
+    <tr>
+        <td class="footer">
+            <p>&copy; 2024 UniPay-Connect. Tất cả các quyền được bảo lưu.</p>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,36 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/transactionservice
+    username: postgres
+    password: Admin@123
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    baseline-version: 0
+    baseline-description: "init database"
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092
+      group-id: transaction-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: '*'
+
+jwt:
+  signerKey: "Rz3CoupHfEC7kwpbydPqXDcoOqd9Ws9KeYUUASkUErg="
+
+feign:
+  url:
+    user-service: http://localhost:8090/internal/v1/user/
+
+server:
+  port: 8092
