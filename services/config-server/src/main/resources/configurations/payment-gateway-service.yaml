@@ -15,10 +15,15 @@ spring:
     password: ${spring.datasource.password}
     baseline-version: 0
     baseline-description: "init database"
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 feign:
   url:
-    user-service: http://localhost:8090/internal/v1/user
+    user-service: http://localhost:8090/internal/user
     notification-service: http://localhost:8093/api/v1/notification
     transaction-service: http://localhost:8092/internal/v1/transaction
 
