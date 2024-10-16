@@ -38,10 +38,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             if (jwtToken != null) {
                 String username = jwtService.extractUsername(jwtToken);
-                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+//                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     CustomUserDetails customUserDetails = (CustomUserDetails) customUserDetailService.loadUserByUsername(username);
                     System.out.println(customUserDetails);
-                    if (jwtService.validateJwtToken(jwtToken, customUserDetails)) {
+//                    if (jwtService.validateJwtToken(jwtToken, customUserDetails)) {
                         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                                 customUserDetails,
                                 null,
@@ -52,12 +52,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         );
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                     }
-                }
-            }
-        } catch (ParseException | JOSEException e) {
+
+
+        } catch (ParseException e) {
             throw new RuntimeException(e);
         }
 
+//        try {
+//            String username = jwtService.extractUsername(jwtToken);
+//            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+//                CustomUserDetails customUserDetails = (CustomUserDetails) customUserDetailService.loadUserByUsername(username);
+//                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+//                        customUserDetails,
+//                        null,
+//                        customUserDetails.getAuthorities()
+//                );
+//                authentication.setDetails(
+//                        new WebAuthenticationDetailsSource().buildDetails(request)
+//                );
+//                SecurityContextHolder.getContext().setAuthentication(authentication);
+//            }
+//
+//        } catch (ParseException e) {
+//            throw new RuntimeException(e);
+//        }
         // Call next Filter
         filterChain.doFilter(request, response);
     }

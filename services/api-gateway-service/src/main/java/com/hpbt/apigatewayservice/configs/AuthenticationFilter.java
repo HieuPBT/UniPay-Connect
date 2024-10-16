@@ -40,7 +40,9 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
 //    @Value("${api.public-endpoints}")
 //    @NonFinal
-    private String [] publicEndpoints = {"/login", "/user/hello"};
+    private String [] publicEndpoints = {"/v1/user/.*", "/authentication/login"};
+
+    private String [] paymentGatewayEndpoints = {"/v1/payment/.*"};
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -48,15 +50,30 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
-        List<String> authHeader = exchange.getRequest().getHeaders().get("X-API-KEY");
-        if(CollectionUtils.isEmpty(authHeader)) {
+        if(isPaymentGatewayEndpoint(exchange.getRequest())){
+            List<String> apiKeyHeader = exchange.getRequest().getHeaders().get("X-API-KEY");
+            if(CollectionUtils.isEmpty(apiKeyHeader)){
+                return unauthenticated(exchange.getResponse());
+            }
+            String apiKey = apiKeyHeader.get(0);
+            return userService.validateApiKey(apiKey)
+                    .flatMap(response -> response.getResult().isValid() ? chain.filter(exchange) : unauthenticated(exchange.getResponse()))
+                    .onErrorResume(e -> {
+                        log.error("Error during API key validation", e);
+                        return unauthenticated(exchange.getResponse());
+                    });
+        }
+
+        List<String> jwtTokenHeaders = exchange.getRequest().getHeaders().get("Authorization");
+        if(CollectionUtils.isEmpty(jwtTokenHeaders)){
             return unauthenticated(exchange.getResponse());
         }
-        String apiKey = authHeader.get(0);
-        return userService.validateApiKey(apiKey)
-                .flatMap(response -> response.getResult().isValid() ? chain.filter(exchange) : unauthenticated(exchange.getResponse()))
+        String jwtToken = jwtTokenHeaders.get(0).replace("Bearer", "");
+        log.info("JWT Token: {}", jwtToken);
+        return userService.validateJwtToken(jwtToken)
+                .flatMap(res -> res.getResult().isValid() ? chain.filter(exchange) : unauthenticated(exchange.getResponse()))
                 .onErrorResume(e -> {
-                    log.error("Error during API key validation", e);
+                    log.error("Error during Jwt Token validation", e);
                     return unauthenticated(exchange.getResponse());
                 });
     }
@@ -68,6 +85,11 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     private boolean isPublicEndpoint(ServerHttpRequest request){
         return Arrays.stream(publicEndpoints)
+                .anyMatch(s -> request.getURI().getPath().matches(apiPrefix + s));
+    }
+
+    private boolean isPaymentGatewayEndpoint(ServerHttpRequest request){
+        return Arrays.stream(paymentGatewayEndpoints)
                 .anyMatch(s -> request.getURI().getPath().matches(apiPrefix + s));
     }
 

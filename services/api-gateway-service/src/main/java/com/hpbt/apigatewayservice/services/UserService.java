@@ -12,10 +12,15 @@ import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserService {
-    final UserServiceClient userServiceClient;
+    UserServiceClient userServiceClient;
+
     public Mono<ApiResponse<ValidateAccessKeyResponse>> validateApiKey(String apiKey) {
         return userServiceClient.validateApiKey(ValidateApiKeyRequest.builder().apiKey(apiKey).build());
+    }
+
+    public Mono<ApiResponse<ValidateAccessKeyResponse>> validateJwtToken(String apiKey) {
+        return userServiceClient.validateJwtToken(ValidateApiKeyRequest.builder().apiKey(apiKey).build());
     }
 }
