@@ -3,6 +3,9 @@
 
 # Log file
 *.log
+*.log.gz
+*.log-*.gz
+logs/
 
 # BlueJ files
 *.ctxt
@@ -25,4 +28,22 @@ replay_pid*
 
 # intellij
 .idea/
+out/
+output/
+**/build/
+
+**/gradle_build/
+*.iml
+**/*.iml
+*.ipr
+*.iws
+
+# OSX
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# env files
+env.properties
 
