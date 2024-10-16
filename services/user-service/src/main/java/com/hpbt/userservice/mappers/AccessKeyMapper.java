@@ -37,7 +37,8 @@ public class AccessKeyMapper {
                 accessKey.getApiKey(),
                 accessKey.getStatus(),
                 accessKey.getExpires_at(),
-                accessKey.getRevoked_at()
+                accessKey.getRevoked_at(),
+                accessKey.getCreated_at()
         );
     }
 }

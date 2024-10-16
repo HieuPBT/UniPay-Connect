@@ -1,7 +1,10 @@
 package com.hpbt.userservice.configs;
 
 import com.hpbt.userservice.security.*;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,13 +30,13 @@ import javax.crypto.spec.SecretKeySpec;
 @EnableWebSecurity
 @RequiredArgsConstructor
 @EnableMethodSecurity
-
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SpringSecurityConfig {
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    private final ApiKeyAuthenticationFilter apiKeyAuthenticationFilter;
+    ApiKeyAuthenticationFilter apiKeyAuthenticationFilter;
 
-    private final CustomUserDetailService customUserDetailService;
+    CustomUserDetailService customUserDetailService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -54,32 +57,18 @@ public class SpringSecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
+    @NonFinal
     @Value("${jwt.signerKey}")
-    private String signerKey;
-
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http.csrf(AbstractHttpConfigurer::disable)
-//                .authorizeHttpRequests(requests -> requests
-////                        .requestMatchers("/api/v1/user/**").authenticated()
-////                        .requestMatchers("/eureka/**").permitAll()
-//                        .requestMatchers("/api/v1/login").permitAll()
-//                        .anyRequest().authenticated())
-//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-//
-//        http.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder())));
-//
-////        http.authenticationProvider(daoAuthenticationProvider());
-//
-////        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-//        return http.build();
-//    }
+    String signerKey;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(requests -> requests.requestMatchers("/api/v1/login").permitAll()
                         .requestMatchers("/api/v1/user/register").permitAll()
-//                        .requestMatchers("/api/v1/user/hello").hasRole("ADMIN")
+                                .requestMatchers("/api/authentication/**").permitAll()
+                                .requestMatchers("/api/v1/user/validate-api-key").permitAll()
+                                .requestMatchers("/internal/user/**").permitAll()
+                        .requestMatchers("/api/v1/user/hello").permitAll()
                         .anyRequest().authenticated()  // Các yêu cầu khác cần xác thực
         ).exceptionHandling(exceptionHandling -> exceptionHandling
 
@@ -88,8 +77,8 @@ public class SpringSecurityConfig {
         ).sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(daoAuthenticationProvider())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(apiKeyAuthenticationFilter, JwtAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+//                .addFilterBefore(apiKeyAuthenticationFilter, JwtAuthenticationFilter.class);
         // Sử dụng DaoAuthenticationProvider để xác thực
 //        http.authenticationProvider(daoAuthenticationProvider());
 

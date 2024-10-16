@@ -35,7 +35,6 @@ public class User {
     @Size(min = 3, message = "Username must be at least 3 character")
     @NotNull(message = "Username cannot be null")
     @NotBlank(message = "Username cannot be blank")
-    @Size(min = 1, max = 45)
     String username;
 
     @JsonIgnore

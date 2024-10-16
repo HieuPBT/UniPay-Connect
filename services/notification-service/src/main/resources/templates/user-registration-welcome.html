@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chào mừng đến với UniPay-Connect</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        table {
+            border-spacing: 0;
+            width: 100%;
+            margin: 0 auto;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            background-color: #ffffff;
+            margin: 20px auto;
+        }
+        .header {
+            background-color: #4CAF50;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 20px;
+            text-align: center;
+        }
+        .content h2 {
+            color: #333333;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .content p {
+            color: #666666;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        .footer {
+            background-color: #f1f1f1;
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            color: #666666;
+        }
+    </style>
+</head>
+<body>
+<table role="presentation" class="container">
+    <tr>
+        <td class="header">
+            <h1>Chào mừng đến với Themlyft!</h1>
+        </td>
+    </tr>
+    <tr>
+        <td class="content">
+            <h2 th:text="'Xin chào ' + ${username} + ','">Xin chào [Tên người dùng],</h2>
+            <p>Chúng tôi rất vui mừng bạn đã tham gia UniPay-Connect. Hãy bắt đầu tùy chỉnh và khám phá các tính năng tuyệt vời của chúng tôi!</p>
+            <p>Nhấn vào nút dưới đây để bắt đầu:</p>
+            <a th:href="@{https://www.themlyft.com/get-started}" class="btn">Bắt đầu</a>
+        </td>
+    </tr>
+    <tr>
+        <td class="footer">
+            <p>&copy; 2024 Themlyft. Tất cả các quyền được bảo lưu.</p>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
